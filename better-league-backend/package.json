@@ -1,0 +1,30 @@
+{
+  "name": "better-league-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.bundle.js",
+    "build": "webpack",
+    "dev": "nodemon ./server.js localhost 3080"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "child-process": "^1.0.2",
+    "cli-color": "^2.0.3",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "http": "^0.0.1-security",
+    "http-proxy-middleware": "^2.0.6",
+    "league-connect": "^6.0.0-rc9",
+    "node-cache": "^5.1.2",
+    "repl": "^0.1.3",
+    "socket.io": "^4.7.1",
+    "tree-kill": "^1.2.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.20",
+    "webpack": "^5.75.0"
+  }
+}

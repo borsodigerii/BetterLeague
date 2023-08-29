@@ -1,0 +1,46 @@
+.userDetails{
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: flex-end;
+  background: rgb(0,0,0);
+  background: linear-gradient(0deg, rgba(0,0,0,1) 0%, rgba(255,255,255,0) 100%);
+  padding: 40px;
+}
+.profileIcon{
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+}
+.nav{
+  backdrop-filter: blur(20px) brightness(50%) !important;
+}
+.frontMain{
+  padding: 0 !important;
+  height: 100% !important;
+  top: 0;
+}
+.userName{
+  color: white;
+  font-size: 4em;
+  font-family: 'Product Sans', sans-serif;
+}
+.userName>.userRegion{
+  color: gray;
+  font-size: 2rem;
+  padding-left: 10px;
+  font-style: italic;
+}
+.userLevel{
+  color: white;
+  font-size: 2em;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+.userDetailsContainer{
+  display: flex;
+  align-items: center;
+  gap: 40px;
+}

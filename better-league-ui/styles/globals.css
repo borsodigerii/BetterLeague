@@ -1,0 +1,27 @@
+:root{
+  --base-orange: rgb(197, 162, 96);
+  --base-dark-blue: #020126;
+  --base-divider: rgb(143, 143, 143);
+}
+main{
+  width: 100%;
+  height: calc(100vh - 63px);
+  
+  padding: 40px;
+  position: fixed;
+  top: 63px;
+  left: 0;
+}
+main{
+  color: white;
+}
+*{
+  box-sizing: border-box;
+  font-family: 'Roboto', sans-serif;
+}
+html{
+  background-color: var(--base-dark-blue);
+}
+.playButton button{
+  padding: 0 !important;
+}

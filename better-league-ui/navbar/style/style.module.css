@@ -1,0 +1,127 @@
+.navWrapper{
+    display: inline-flex;
+    flex-direction: row;
+    gap: 40px;
+}
+.nav{
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 10;
+    /*backdrop-filter: blur(20px);*/
+    backdrop-filter: blur(20px) brightness(50%) !important;
+    width: 100%;
+    border-bottom: 1px solid var(--base-divider);
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+.navLinkLi{
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-self: center;
+}
+.navLink{
+    outline: none;
+    padding: 30px;
+    font-size: 20px;
+    background-color: transparent;
+    cursor: pointer;
+    border: none;
+    transition: all .3s ease;
+    text-transform: uppercase;
+    /*color: #dbc753;*/
+    color: white;
+    font-weight: 900;
+    font-family: 'Product Sans', sans-serif;
+    font-size: 25px;
+}
+.navLink:hover{
+    transform: scale(1.1);
+}
+.navResources{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 10px;
+}
+.navResourcesContainer{
+    display: flex;
+    gap: 20px;
+    justify-content: flex-start;
+    width: 100%;
+}
+.navResources .resourceContainer{
+    display: flex;
+    color: white;
+    justify-content: flex-start;
+    align-items: center;
+}
+.navResources .resourceContainer img, .navResources .miscContainer img{
+    width: 20px;
+    margin-right: 5px;
+}
+.miscContainer{
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 30px;
+}
+.miscContainer .misc{
+    display: flex;
+    align-items: center;
+    position: relative;
+    top: -10px;
+    color: gray;
+    font-weight: bold;
+    font-family: 'Product Sans', sans-serif;
+}
+.miscContainer .misc{
+    transition: all .3s ease;
+    cursor: pointer;
+}
+.miscContainer .misc:first-child:hover{
+    color: white
+}
+
+.miscContainer .misc:first-child:hover img{
+    animation-name: spinning-anim;
+    animation-duration: 2s;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+}
+@keyframes spinning-anim{
+    0%{
+        transform: rotate(0deg) scale(1.1);
+    }
+    100%{
+        transform: rotate(360deg) scale(1.1);
+    }
+}
+.misc.active{
+    color: white;
+}
+.misc.active img{
+    animation-name: spinning-anim;
+    animation-duration: 2s;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+}
+.navLink.active{
+    position: relative;
+}
+.navLink.active::after{
+    content: '';
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+    height: 2px;
+    background-color: var(--base-orange);
+}
