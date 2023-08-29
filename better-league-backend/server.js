@@ -55,6 +55,26 @@ app.post('/api/exit-lobby', (req, res) => {
   //log(req.body)
   LCU_Api.exitLobby(req, res);
 });
+app.post('/api/start-matchmaking', (req, res) => {
+  log(ConsoleColor.bgMagenta(ConsoleColor.black('[API] POST: /start-matchmaking')))
+  //log(req.body)
+  LCU_Api.startMatchmaking(req, res);
+});
+app.post('/api/stop-matchmaking', (req, res) => {
+  log(ConsoleColor.bgMagenta(ConsoleColor.black('[API] POST: /stop-matchmaking')))
+  //log(req.body)
+  LCU_Api.stopMatchmaking(req, res);
+});
+app.post('/api/accept-ready-check', (req, res) => {
+  log(ConsoleColor.bgMagenta(ConsoleColor.black('[API] POST: /accept-ready-check')))
+  //log(req.body)
+  LCU_Api.acceptReadyCheck(req, res);
+});
+app.post('/api/decline-ready-check', (req, res) => {
+  log(ConsoleColor.bgMagenta(ConsoleColor.black('[API] POST: /decline-ready-check')))
+  //log(req.body)
+  LCU_Api.declineReadyCheck(req, res);
+});
 app.get('/api/lobby', (req, res) => {
   log(ConsoleColor.bgGreen(ConsoleColor.black('[API] GET: /lobby')))
   LCU_Api.getLobbyInfo(req, res);  

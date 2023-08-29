@@ -1,6 +1,8 @@
 :root{
   --base-orange: rgb(197, 162, 96);
+  --base-darker-orange: rgb(124, 102, 61);
   --base-dark-blue: #020126;
+  --base-middle-blue: #040242;
   --base-divider: rgb(143, 143, 143);
 }
 main{

@@ -86,6 +86,30 @@ async function _isInLobby(req, res){
     //console.log(userData.json());
     return isInLobbyData.json();
 }
+async function _isInLobby(req, res){
+    const credentials = await get_raw_auth();
+    const session = await lc.createHttpSession(credentials)
+    const isInLobbyData = await lc.createHttp2Request({
+        method: 'GET',
+        url: '/lol-lobby/v2/party-active'
+    }, session, credentials);
+    session.close()
+    //console.log(userData.json());
+    return isInLobbyData.json();
+}
+async function _isInMatchMaking(){
+    const credentials = await get_raw_auth();
+    const session = await lc.createHttpSession(credentials)
+    const isInLobbyData = await lc.createHttp2Request({
+        method: 'GET',
+        url: '/lol-lobby/v2/lobby/matchmaking/search-state'
+    }, session, credentials);
+    session.close()
+    //console.log(userData.json());
+    if(isInLobbyData.json().searchState != "Invalid") return true
+    return false
+    //return isInLobbyData.json();
+}
 async function queues(req, res){
     if(apiCache.has("queues")){
         log(ConsoleColor.greenBright("[API][CACHE][QUEUES] Cache hit"));
@@ -201,7 +225,7 @@ async function exitLobby(req, res){
     log(ConsoleColor.green("[API][EXIT-LOBBY] Checking if user is in Lobby..."));
     let isInLobbyBool = await _isInLobby();
     if(!isInLobbyBool){
-        log(ConsoleColor.error("[API][EXIT-LOBBY][ERROR] User is not in a lobby."))
+        log(ConsoleColor.red("[API][EXIT-LOBBY][ERROR] User is not in a lobby."))
         res.json(serializeResponse(null, 404, "User is not in a lobby."));
         return;
     }
@@ -278,6 +302,16 @@ async function initSubs(){
                 let readycheckState = event.data.readyCheck.state;
                 console.log("[API][WS][CLIENT][MATCHMAKING] Match found, showing ready check.");
                 console.log("Ready Check state: " + readycheckState);
+                let data = {
+                    timeLeft: event.data.readyCheck.timer
+                }
+                socket.emit("readyCheck", data)
+            }else{
+                let data = {
+                    timeElapsed: event.data.timeInQueue,
+                    timeEstimated: event.data.estimatedQueueTime
+                }
+                socket.emit("updatedLobby", data)
             }
         }
         console.log("eventType: " + eventType)
@@ -327,6 +361,8 @@ async function initSubs(){
             socket.emit("exitedLobby");
         }else if(eventType == "Create"){
             log(ConsoleColor.green("[API][WS][CLIENT][LOBBY] Created lobby"))
+            let queueid = event.data.gameConfig.queueId;
+            //TODO: queue lekerdezest megoldani, hogy amikor a createdLobby parancsot emittaljuk, kuldjuk vele a queue adatokat is, amiket frontenden fel tudunk hasznalni
             socket.emit("createdLobby");
         }
         // poziciok: UTILITY - support, MIDDLE - mid, BOTTOM - bot, TOP - top, JUNGLE - jg
@@ -473,7 +509,134 @@ async function getResources(){
     //console.log(userData.json());
     res.json(serializeResponse(userData.json()));
 }
-
+async function startMatchmaking(req, res){
+    log(ConsoleColor.magenta("[API][START-MATCHMAKING] Checking if user is in Lobby..."));
+    let isInLobbyBool = await _isInLobby();
+    if(!isInLobbyBool){
+        log(ConsoleColor.red("[API][START-MATCHMAKING][ERROR] User is not in a lobby."))
+        res.json(serializeResponse(null, 404, "User is not in a lobby."));
+        return;
+    }
+    log(ConsoleColor.magenta("[API][START-MATCHMAKING][INFO] User is currently in Lobby. Starting search..."))
+    const credentials = await get_raw_auth();
+    const lobbyData = await lc.createHttp1Request({
+        method: 'POST',
+        url: '/lol-lobby/v2/lobby/matchmaking/search'
+    }, credentials);
+    /*const session = await lc.createHttpSession(credentials)
+    const lobbyData = await lc.createHttp2Request({
+        method: 'POST',
+        url: '/lol-lobby/v2/lobby',
+        body: {
+            "queueId": queueId
+        }
+    }, session, credentials);
+    session.close()*/
+    if(lobbyData.status == 204){
+        log(ConsoleColor.green("[API][START-MATCHMAKING] Started matchmaking"))
+        res.json(serializeResponse(null, 200, "Started matchmaking"));
+        // emit socketio as successfull lobby creation to nav and all that
+    }else{
+        log(ConsoleColor.red("[API][START-MATCHMAKING][ERROR] Could not start matchmaking"))
+        res.json(serializeResponse(null, 500, "Could not start matchmaking"));
+    }
+}
+async function stopMatchmaking(req, res){
+    log(ConsoleColor.magenta("[API][STOP-MATCHMAKING] Checking if user is in matchmaking..."));
+    let isInMatchMakingBool = await _isInMatchMaking();
+    if(!isInMatchMakingBool){
+        log(ConsoleColor.red("[API][STOP-MATCHMAKING][ERROR] User is not in matchmaking."))
+        res.json(serializeResponse(null, 404, "User is not in matchmaking."));
+        return;
+    }
+    log(ConsoleColor.magenta("[API][STOP-MATCHMAKING][INFO] User is currently in matchmaking. Stopping search..."))
+    const credentials = await get_raw_auth();
+    const lobbyData = await lc.createHttp1Request({
+        method: 'DELETE',
+        url: '/lol-lobby/v2/lobby/matchmaking/search'
+    }, credentials);
+    /*const session = await lc.createHttpSession(credentials)
+    const lobbyData = await lc.createHttp2Request({
+        method: 'POST',
+        url: '/lol-lobby/v2/lobby',
+        body: {
+            "queueId": queueId
+        }
+    }, session, credentials);
+    session.close()*/
+    if(lobbyData.status == 204){
+        log(ConsoleColor.green("[API][STOP-MATCHMAKING] Stopped matchmaking"))
+        res.json(serializeResponse(null, 200, "Stopped matchmaking"));
+        // emit socketio as successfull lobby creation to nav and all that
+    }else{
+        log(ConsoleColor.red("[API][STOP-MATCHMAKING][ERROR] Could not stop matchmaking"))
+        res.json(serializeResponse(null, 500, "Could not stop matchmaking"));
+    }
+}
+async function acceptReadyCheck(req, res){
+    log(ConsoleColor.magenta("[API][ACCEPT-READY-CHECK] Checking if user is in matchmaking..."));
+    let isInMatchMakingBool = await _isInMatchMaking();
+    if(!isInMatchMakingBool){
+        log(ConsoleColor.red("[API][ACCEPT-READY-CHECK][ERROR] User is not in matchmaking."))
+        res.json(serializeResponse(null, 404, "User is not in matchmaking."));
+        return;
+    }
+    log(ConsoleColor.magenta("[API][ACCEPT-READY-CHECK][INFO] User is currently in matchmaking. Accepting Ready Check..."))
+    const credentials = await get_raw_auth();
+    const lobbyData = await lc.createHttp1Request({
+        method: 'POST',
+        url: '/lol-matchmaking/v1/ready-check/accept'
+    }, credentials);
+    /*const session = await lc.createHttpSession(credentials)
+    const lobbyData = await lc.createHttp2Request({
+        method: 'POST',
+        url: '/lol-lobby/v2/lobby',
+        body: {
+            "queueId": queueId
+        }
+    }, session, credentials);
+    session.close()*/
+    if(lobbyData.status == 204){
+        log(ConsoleColor.green("[API][ACCEPT-READY-CHECK] Accepted ready check"))
+        res.json(serializeResponse(null, 200, "Accepted ready check"));
+        // emit socketio as successfull lobby creation to nav and all that
+    }else{
+        log(ConsoleColor.red("[API][ACCEPT-READY-CHECK][ERROR] Could not accept ready check"))
+        res.json(serializeResponse(null, 500, "Could not accept ready check"));
+    }
+}
+async function declineReadyCheck(req, res){
+    log(ConsoleColor.magenta("[API][DECLINE-READY-CHECK] Checking if user is in matchmaking..."));
+    let isInMatchMakingBool = await _isInMatchMaking();
+    if(!isInMatchMakingBool){
+        log(ConsoleColor.red("[API][DECLINE-READY-CHECK][ERROR] User is not in matchmaking."))
+        res.json(serializeResponse(null, 404, "User is not in matchmaking."));
+        return;
+    }
+    log(ConsoleColor.magenta("[API][DECLINE-READY-CHECK][INFO] User is currently in matchmaking. Declining Ready Check..."))
+    const credentials = await get_raw_auth();
+    const lobbyData = await lc.createHttp1Request({
+        method: 'POST',
+        url: '/lol-matchmaking/v1/ready-check/decline'
+    }, credentials);
+    /*const session = await lc.createHttpSession(credentials)
+    const lobbyData = await lc.createHttp2Request({
+        method: 'POST',
+        url: '/lol-lobby/v2/lobby',
+        body: {
+            "queueId": queueId
+        }
+    }, session, credentials);
+    session.close()*/
+    if(lobbyData.status == 204){
+        log(ConsoleColor.green("[API][DECLINE-READY-CHECK] Declined ready check"))
+        res.json(serializeResponse(null, 200, "Declined ready check"));
+        // emit socketio as successfull lobby creation to nav and all that
+    }else{
+        log(ConsoleColor.red("[API][DECLINE-READY-CHECK][ERROR] Could not decline ready check"))
+        res.json(serializeResponse(null, 500, "Could not decline ready check"));
+    }
+}
 exports.get_auth_info = get_auth_info;
 exports.user_info = user_info;
 exports.queues = queues; 
@@ -484,3 +647,7 @@ exports.getLobbyInfo = getLobbyInfo;
 exports.exitLobby = exitLobby;
 exports.isInLobby = isInLobby;
 exports.getAsset = getAsset;
+exports.startMatchmaking = startMatchmaking;
+exports.stopMatchmaking = stopMatchmaking;
+exports.acceptReadyCheck = acceptReadyCheck;
+exports.declineReadyCheck = declineReadyCheck;

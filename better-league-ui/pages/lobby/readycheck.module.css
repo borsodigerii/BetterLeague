@@ -1,0 +1,44 @@
+.readyCheckBackdrop{
+    z-index: 99999;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.readyCheckContainer{
+    background-color: var(--base-middle-blue);
+    padding: 70px;
+    
+}
+.readyCheck{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+.readyCheck::after{
+    content: '';
+    border: 2px solid var(--base-orange);
+    background: transparent;
+    z-index: 1;
+    position: absolute;
+    top: -50px;
+    left: -48px;
+    width: 240px;
+    height: 211px;
+}
+.readyCheck::before{
+    content: '';
+    border: 2px solid var(--base-darker-orange);
+    background: transparent;
+    z-index: 1;
+    position: absolute;
+    top: -61px;
+    left: -37px;
+    width: 243px;
+    height: 211px;
+}

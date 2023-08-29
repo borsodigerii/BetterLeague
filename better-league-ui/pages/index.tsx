@@ -28,16 +28,17 @@ export default function Home() {
   const [playButtonName, setPlayButtonName] = useState("Play")
   const [blueEssence, setBlueEssence] = useState(0)
   const [riotPoints, setRiotPoints] = useState(0)
+  const [currentQueue, setCurrentQueue]  = useState(null)
 
   //SETTINGS
-  const [setting_abc, setSetting_abc] = useState(false)
+  const [setting_autoReadyCheck, setSetting_autoReadyCheck] = useState(false)
 
   const settingsList: Setting[] = [
     {
-      name: "ABC Setting",
-      identifier: "setting_abc",
-      value: setting_abc,
-      stateHandler: setSetting_abc
+      name: "Automatically accept ready check",
+      identifier: "setting_autoReadyCheck",
+      value: setting_autoReadyCheck,
+      stateHandler: setSetting_autoReadyCheck
     }
   ]
 
@@ -51,11 +52,11 @@ export default function Home() {
     })
   }
   function initSettings(){
-    const stored_setting_abc = localStorage.getItem('setting_abc')
-    if(stored_setting_abc){
-      setSetting_abc(JSON.parse(stored_setting_abc));
+    const stored_setting_autoReadyCheck = localStorage.getItem('setting_autoReadyCheck')
+    if(stored_setting_autoReadyCheck){
+      setSetting_autoReadyCheck(JSON.parse(stored_setting_autoReadyCheck));
     }else{
-      localStorage.setItem('setting_abc', setting_abc.toString())
+      localStorage.setItem('setting_autoReadyCheck', setting_autoReadyCheck.toString())
     }
   }
   //SETTINGS
@@ -76,7 +77,10 @@ export default function Home() {
       setAuthPack(authPack);
       let userdata = await callAPI("user-info", "GET", {});
       setUserData(userdata);
-      initSettings();
+      if (typeof window !== 'undefined') {
+        initSettings();
+      }
+      
       setInitialized(true);
       
     }
@@ -88,7 +92,12 @@ export default function Home() {
   
 
   useEffect(() => {
-    socket.on('createdLobby', () => {
+    socket.on("connect", () => {
+      
+      console.log("connected")
+    })
+    socket.on('createdLobby', (data: any) => {
+      setCurrentQueue(data)
       setNavigation("lobby")
       setPlayButtonName("Party")
     });
@@ -159,7 +168,7 @@ export default function Home() {
     case "lobby":
       finalResult.push(
         <>
-          <Lobby socket={socket}/>
+          <Lobby socket={socket} queue={currentQueue}/>
         </>
       )
       break;
