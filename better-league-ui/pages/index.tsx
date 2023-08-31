@@ -1,189 +1,204 @@
-import Head from 'next/head'
-import Image from 'next/image'
-import { Anybody, Inter } from '@next/font/google'
-import styles from '@/styles/Home.module.css'
-import { useState, useEffect } from 'react'
-import callAPI from './api/callAPI'
-import LoadingScreen__Login from './LoadingScreen__Login'
+import Head from "next/head"
+import Image from "next/image"
+import { Anybody, Inter } from "@next/font/google"
+import styles from "@/styles/Home.module.css"
+import { useState, useEffect } from "react"
+import callAPI from "./api/callAPI"
+import LoadingScreen__Login from "./LoadingScreen__Login"
 
+import MainFront from "./MainFront"
+import CreateLobby from "./lobby/CreateLobby"
+import Lobby from "./lobby/Lobby"
+import { NavBarIconLinkStruct, NavBarLinkStruct } from "@/navbar/NavBar"
+import NavBar from "@/navbar/NavBar"
 
-import MainFront from './MainFront'
-import CreateLobby from './lobby/CreateLobby'
-import Lobby from './lobby/Lobby'
-import { NavBarIconLinkStruct, NavBarLinkStruct } from '@/navbar/NavBar'
-import NavBar from '@/navbar/NavBar'
+import { socket } from "./socket-io"
+import Settings, { Setting } from "./Settings"
 
-import { socket } from './socket-io'
-import Settings, { Setting } from './Settings'
-
-const inter = Inter({ subsets: ['latin'] })
-const sc = socket.connect();
+const inter = Inter({ subsets: ["latin"] })
+const sc = socket.connect()
 export default function Home() {
-  const [port, setPort] = useState(0);
-  const [password, setPassword] = useState("");
-  const [authPack, setAuthPack] = useState({ port: null, pass: null});
-  const [initialized, setInitialized] = useState(false);
-  const [userData, setUserData] = useState({ payload: null });
-  const [startedInit, setStartedInit] = useState(false);
-  const [playButtonName, setPlayButtonName] = useState("Play")
-  const [blueEssence, setBlueEssence] = useState(0)
-  const [riotPoints, setRiotPoints] = useState(0)
-  const [currentQueue, setCurrentQueue]  = useState(null)
+	const [port, setPort] = useState(0)
+	const [password, setPassword] = useState("")
+	const [authPack, setAuthPack] = useState({ port: null, pass: null })
+	const [initialized, setInitialized] = useState(false)
+	const [userData, setUserData] = useState({ payload: null })
+	const [startedInit, setStartedInit] = useState(false)
+	const [playButtonName, setPlayButtonName] = useState("Play")
+	const [blueEssence, setBlueEssence] = useState(0)
+	const [riotPoints, setRiotPoints] = useState(0)
+	const [currentQueue, setCurrentQueue] = useState(null)
 
-  //SETTINGS
-  const [setting_autoReadyCheck, setSetting_autoReadyCheck] = useState(false)
+	//SETTINGS
+	const [setting_autoReadyCheck, setSetting_autoReadyCheck] = useState(false)
 
-  const settingsList: Setting[] = [
-    {
-      name: "Automatically accept ready check",
-      identifier: "setting_autoReadyCheck",
-      value: setting_autoReadyCheck,
-      stateHandler: setSetting_autoReadyCheck
-    }
-  ]
+	const settingsList: Setting[] = [
+		{
+			name: "Automatically accept ready check",
+			identifier: "setting_autoReadyCheck",
+			value: setting_autoReadyCheck,
+			stateHandler: setSetting_autoReadyCheck,
+		},
+	]
 
-  //-------
-  function setSetting(identifier: string, value: boolean){
-    settingsList.map((setting: Setting) => {
-      if(setting.identifier == identifier){
-        localStorage.setItem(setting.identifier, value.toString())
-        setting.stateHandler(value)
-      }
-    })
-  }
-  function initSettings(){
-    const stored_setting_autoReadyCheck = localStorage.getItem('setting_autoReadyCheck')
-    if(stored_setting_autoReadyCheck){
-      setSetting_autoReadyCheck(JSON.parse(stored_setting_autoReadyCheck));
-    }else{
-      localStorage.setItem('setting_autoReadyCheck', setting_autoReadyCheck.toString())
-    }
-  }
-  //SETTINGS
-  
-  const [navigation, setNavigation] = useState("home");
-  
-  const initApp = async () =>{
-    console.log("[INIT] Init started..")
-    if(!startedInit){
-      setStartedInit(true);
-      let response = await callAPI("get-auth-info", "GET", {});
-      setPort(response.payload.port);
-      setPassword(response.payload.password);
-      let authPack = {
-        port: response.payload.port,
-        pass: response.payload.password
-      };
-      setAuthPack(authPack);
-      let userdata = await callAPI("user-info", "GET", {});
-      setUserData(userdata);
-      if (typeof window !== 'undefined') {
-        initSettings();
-      }
-      
-      setInitialized(true);
-      
-    }
-    console.log("[INIT] Init finished")
-  };
-  if(!startedInit)
-    initApp();
-  
-  
+	//-------
+	function setSetting(identifier: string, value: boolean) {
+		settingsList.map((setting: Setting) => {
+			if (setting.identifier == identifier) {
+				localStorage.setItem(setting.identifier, value.toString())
+				setting.stateHandler(value)
+			}
+		})
+	}
+	function initSettings() {
+		const stored_setting_autoReadyCheck = localStorage.getItem(
+			"setting_autoReadyCheck"
+		)
+		if (stored_setting_autoReadyCheck) {
+			setSetting_autoReadyCheck(JSON.parse(stored_setting_autoReadyCheck))
+		} else {
+			localStorage.setItem(
+				"setting_autoReadyCheck",
+				setting_autoReadyCheck.toString()
+			)
+		}
+	}
+	//SETTINGS
 
-  useEffect(() => {
-    socket.on("connect", () => {
-      
-      console.log("connected")
-    })
-    socket.on('createdLobby', (data: any) => {
-      setCurrentQueue(data)
-      setNavigation("lobby")
-      setPlayButtonName("Party")
-    });
-    socket.on('exitedLobby', () => {
-      setNavigation("home")
-      setPlayButtonName("Play")
-    });
-  }, [socket]);
-  function changeNavigation(slug: string){
-    setNavigation(slug);
-  }
-  async function isInLobby(){
-    let data = await callAPI("isInLobby", "GET", {});
-    return data.payload;
-  }
-  let finalResult = [];
-  let links: NavBarLinkStruct[] = [
-    {
-      link: "create_lobby",
-      displayName: playButtonName,
-      class: ["playButton"]
-    },
-    {
-      link: "home",
-      displayName: "Home",
-      class: []
-    }
-  ]
-  let iconLinks: NavBarIconLinkStruct[] = [
-    {
-      link: "collection",
-      iconId: 0,
-      class: []
-    }
-  ]
-  let resources = {
-    blueEssence: 0,
-    riotPoints: 0
-  }
-  finalResult.push(
-    <Head>
-      <title>BetterLeague</title>
-      <meta name="description" content="Generated by create next app" />
-      <meta name="viewport" content="width=device-width, initial-scale=1" />
-      <link rel="icon" href="/favicon.ico" />
-    </Head>
-  )
-  finalResult.push(
-    <NavBar links={links} iconLinks={iconLinks} resources={resources} changeNav={changeNavigation} currentNav={navigation}/>
-  )
-  switch (navigation){
-    case "home":
-      finalResult.push(
-        <>
-          {initialized == true ? <MainFront auth={authPack} user={userData.payload} changeNav={changeNavigation} /> : <LoadingScreen__Login />}
-        </>
-      )
-      break;
-    
-    case "create_lobby":
-      finalResult.push(
-        <>
-          <CreateLobby isInLobby={isInLobby} changeNav={changeNavigation}/>
-        </>
-      )
-      break;
-    
-    case "lobby":
-      finalResult.push(
-        <>
-          <Lobby socket={socket} queue={currentQueue}/>
-        </>
-      )
-      break;
+	const [navigation, setNavigation] = useState("home")
 
-    case "settings":
-      finalResult.push(
-        <>
-          <Settings settings={settingsList} setSetting={setSetting}/>
-        </>
-      )
-      break;
-  }
-  
-  return (
-    finalResult
-  )
-   
+	const initApp = async () => {
+		console.log("[INIT] Init started..")
+		if (!startedInit) {
+			setStartedInit(true)
+			let response = await callAPI("get-auth-info", "GET", {})
+			setPort(response.payload.port)
+			setPassword(response.payload.password)
+			let authPack = {
+				port: response.payload.port,
+				pass: response.payload.password,
+			}
+			setAuthPack(authPack)
+			let userdata = await callAPI("user-info", "GET", {})
+			setUserData(userdata)
+			if (typeof window !== "undefined") {
+				initSettings()
+			}
+
+			setInitialized(true)
+		}
+		console.log("[INIT] Init finished")
+	}
+	if (!startedInit) initApp()
+
+	useEffect(() => {
+		socket.on("connect", () => {
+			console.log("connected")
+		})
+		socket.on("createdLobby", (data: any) => {
+			setNavigation("lobby")
+			setPlayButtonName("Party")
+		})
+		socket.on("exitedLobby", () => {
+			setNavigation("home")
+			setPlayButtonName("Play")
+		})
+	}, [socket])
+	function changeNavigation(slug: string) {
+		setNavigation(slug)
+	}
+	async function isInLobby() {
+		let data = await callAPI("isInLobby", "GET", {})
+		return data.payload
+	}
+	let finalResult = []
+	let links: NavBarLinkStruct[] = [
+		{
+			link: "create_lobby",
+			displayName: playButtonName,
+			class: ["playButton"],
+		},
+		{
+			link: "home",
+			displayName: "Home",
+			class: [],
+		},
+	]
+	let iconLinks: NavBarIconLinkStruct[] = [
+		{
+			link: "collection",
+			iconId: 0,
+			class: [],
+		},
+	]
+	let resources = {
+		blueEssence: 0,
+		riotPoints: 0,
+	}
+	finalResult.push(
+		<Head>
+			<title>BetterLeague</title>
+			<meta name="description" content="Generated by create next app" />
+			<meta
+				name="viewport"
+				content="width=device-width, initial-scale=1"
+			/>
+			<link rel="icon" href="/favicon.ico" />
+		</Head>
+	)
+	finalResult.push(
+		<NavBar
+			links={links}
+			iconLinks={iconLinks}
+			resources={resources}
+			changeNav={changeNavigation}
+			currentNav={navigation}
+		/>
+	)
+	switch (navigation) {
+		case "home":
+			finalResult.push(
+				<>
+					{initialized == true ? (
+						<MainFront
+							auth={authPack}
+							user={userData.payload}
+							changeNav={changeNavigation}
+						/>
+					) : (
+						<LoadingScreen__Login />
+					)}
+				</>
+			)
+			break
+
+		case "create_lobby":
+			finalResult.push(
+				<>
+					<CreateLobby
+						isInLobby={isInLobby}
+						changeNav={changeNavigation}
+					/>
+				</>
+			)
+			break
+
+		case "lobby":
+			finalResult.push(
+				<>
+					<Lobby socket={socket} />
+				</>
+			)
+			break
+
+		case "settings":
+			finalResult.push(
+				<>
+					<Settings settings={settingsList} setSetting={setSetting} />
+				</>
+			)
+			break
+	}
+
+	return finalResult
 }

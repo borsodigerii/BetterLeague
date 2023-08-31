@@ -1,27 +1,51 @@
-import LobbyMember from './LobbyMember'
+import LobbyMember from "./LobbyMember"
+import style from "./lobby.module.css"
 
-export default function LobbyContainer(props: any){
-    let members = props.lobby.members
-    
-    let display: any[] = []
-    let count = 0;
-    members.forEach((member: any) => {
-        display.push(
-            <LobbyMember member={member}/>
-        )
-        count++
-    })
-    if(count < 4){
-        for(let i = count; i < 4;i++ ){
-            display.push(
-                <LobbyMember member={null}/>
-            )
-        }
-    }
-    /*return (
+export default function LobbyContainer(props: any) {
+	let lobbyData = props.lobby
+	let members = lobbyData.members
+	let localMemberId = lobbyData.localMember.summonerId
+	let display: any[] = []
+	let count = 0
+	display.push(
+		<img
+			className={style.lobbyPlayersTableDividerTop}
+			src="lobby/table-bottom-top.png"
+			alt=""
+		/>
+	)
+	members.forEach((member: any) => {
+		display.push(
+			<LobbyMember
+				member={member}
+				localMember={localMemberId}
+				showPositionSelector={props.showPositionSelector}
+			/>
+		)
+		count++
+	})
+	//if (count < lobbyData.maxTeamSize - 1) {
+	if (count < lobbyData.maxTeamSize) {
+		//for (let i = count; i < lobbyData.maxTeamSize - 1; i++) {
+		for (let i = count; i < lobbyData.maxTeamSize; i++) {
+			display.push(
+				<LobbyMember
+					member={null}
+					localMember={localMemberId}
+					showPositionSelector={props.showPositionSelector}
+				/>
+			)
+		}
+	}
+	display.push(
+		<img
+			className={style.lobbyPlayersTableDividerTop}
+			src="lobby/table-bottom-top.png"
+			alt=""
+		/>
+	)
+	/*return (
         <div>{JSON.stringify(props.lobby)}</div>
     )*/
-    return(
-        <div>{display}</div>
-    )
+	return <div className={style.lobbyContainerPlayers}>{display}</div>
 }

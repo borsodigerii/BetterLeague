@@ -64,6 +64,41 @@ async function user_info(req, res){
     }
     
 }
+async function getUserInfobyId(req, res){
+    /*if(apiCache.has("user_info")){
+        log(ConsoleColor.cyan("[API][CACHE][USERINFO] Cache hit"));
+        let userData = apiCache.get("user_info");
+        res.json(serializeResponse(userData));
+    }else{*/
+        //log(ConsoleColor.cyan("[API][CACHE][USERINFO] Cache miss"));
+        const summonerId = req.body.summonerId;
+        if(summonerId){
+            const credentials = await get_raw_auth();
+            const session = await lc.createHttpSession(credentials)
+            const userData = await lc.createHttp2Request({
+                method: 'GET',
+                url: '/lol-summoner/v1/summoners/' + summonerId
+            }, session, credentials);
+            session.close()
+            //console.log(userData.json());
+            //let data = userData.json();
+            if(userData.ok){
+                res.json(serializeResponse(userData.json()));
+            }else{
+                log(ConsoleColor.red("[API][GET-USER-BY-SUMM-ID][ERROR] No user with given summonerId exists."))
+                res.json(serializeResponse(null, 400, "No user with given summonerId exists."));
+                return;
+            }
+            
+        }else{
+            log(ConsoleColor.red("[API][GET-USER-BY-SUMM-ID][ERROR] No summonerId provided."))
+            res.json(serializeResponse(null, 400, "No summonerId provided in the body of the request."));
+            return;
+        
+        }
+        
+    //}
+}
 async function isInLobby(req, res){
     const credentials = await get_raw_auth();
     const session = await lc.createHttpSession(credentials)
@@ -86,17 +121,7 @@ async function _isInLobby(req, res){
     //console.log(userData.json());
     return isInLobbyData.json();
 }
-async function _isInLobby(req, res){
-    const credentials = await get_raw_auth();
-    const session = await lc.createHttpSession(credentials)
-    const isInLobbyData = await lc.createHttp2Request({
-        method: 'GET',
-        url: '/lol-lobby/v2/party-active'
-    }, session, credentials);
-    session.close()
-    //console.log(userData.json());
-    return isInLobbyData.json();
-}
+
 async function _isInMatchMaking(){
     const credentials = await get_raw_auth();
     const session = await lc.createHttpSession(credentials)
@@ -128,9 +153,34 @@ async function queues(req, res){
         if(apiCache.set("queues", queueData.json())){
             log(ConsoleColor.greenBright("[API][CACHE][QUEUES] Setted cache"));
         }else{
-            log(ConsoleColor.greenBright("[API][CACHE][QUEUES][ERROR] Could not set cache"));
+            log(ConsoleColor.red("[API][CACHE][QUEUES][ERROR] Could not set cache"));
         }
         res.json(serializeResponse(queueData.json()));
+    }
+}
+async function getQueueById(queueid){
+    if(apiCache.has("queue_" + queueid)){
+        log(ConsoleColor.greenBright("[API][CACHE][QUEUE_" + queueid + "] Cache hit"));
+        let queueData = apiCache.get("queue_" + queueid);
+        //res.json(serializeResponse(queueData)); 
+        return queueData;
+    }else{
+        log(ConsoleColor.greenBright("[API][CACHE][QUEUE_" + queueid + "] Cache miss"));
+        const credentials = await get_raw_auth();
+        const session = await lc.createHttpSession(credentials)
+        const queueData = await lc.createHttp2Request({
+            method: 'GET',
+            url: 'lol-game-queues/v1/queues/' + queueid
+        }, session, credentials);
+        session.close()
+        //console.log(userData.json());
+        if(apiCache.set("queue_" + queueid, queueData.json())){
+            log(ConsoleColor.greenBright("[API][CACHE][QUEUE_" + queueid + "] Setted cache"));
+        }else{
+            log(ConsoleColor.red("[API][CACHE][QUEUE_" + queueid + "][ERROR] Could not set cache"));
+        }
+        //res.json(serializeResponse(queueData.json()));
+        return queueData.json();
     }
 }
 async function createLobby(req, res){
@@ -257,13 +307,19 @@ async function exitLobby(req, res){
 async function getLobbyInfo(req, res){
     const credentials = await get_raw_auth();
     const session = await lc.createHttpSession(credentials)
-    const userData = await lc.createHttp2Request({
+    const lobbyFetch = await lc.createHttp2Request({
         method: 'GET',
         url: '/lol-lobby/v2/lobby'
     }, session, credentials);
     session.close()
     //console.log(userData.json());
-    res.json(serializeResponse(userData.json()));
+    let lobbyData = lobbyFetch.json();
+    let queueId = lobbyData.gameConfig.queueId;
+    
+    let queueData = await getQueueById(queueId);
+    //log(queueData)
+    lobbyData.gameConfig.queueData = queueData;
+    res.json(serializeResponse(lobbyData));
 }
 
 function serializeResponse(data, responseCode = 200, responseMessage = "OK"){
@@ -311,7 +367,7 @@ async function initSubs(){
                     timeElapsed: event.data.timeInQueue,
                     timeEstimated: event.data.estimatedQueueTime
                 }
-                socket.emit("updatedLobby", data)
+                socket.emit("updatedLobbySearch", data)
             }
         }
         console.log("eventType: " + eventType)
@@ -361,9 +417,11 @@ async function initSubs(){
             socket.emit("exitedLobby");
         }else if(eventType == "Create"){
             log(ConsoleColor.green("[API][WS][CLIENT][LOBBY] Created lobby"))
-            let queueid = event.data.gameConfig.queueId;
-            //TODO: queue lekerdezest megoldani, hogy amikor a createdLobby parancsot emittaljuk, kuldjuk vele a queue adatokat is, amiket frontenden fel tudunk hasznalni
+            
             socket.emit("createdLobby");
+        }else if(eventType == "Update"){
+            log(ConsoleColor.green("[API][WS][CLIENT][LOBBY] Updated lobby"))
+            socket.emit("updatedLobby");
         }
         // poziciok: UTILITY - support, MIDDLE - mid, BOTTOM - bot, TOP - top, JUNGLE - jg
         /*console.log("LOBBY EVENT:")
@@ -637,6 +695,46 @@ async function declineReadyCheck(req, res){
         res.json(serializeResponse(null, 500, "Could not decline ready check"));
     }
 }
+async function getMap(req, res){
+    log(ConsoleColor.green("[API][GET-MAP] Checking if provided mapId is valid..."));
+    const mapId = req.body.mapID;
+    //console.log(req.body)
+    log(ConsoleColor.green("[API][GET-MAP] Provided mapId: " + req.body.mapID))
+    if(mapId){
+        // van mapId
+        if(apiCache.has("map_" + mapId)){
+            log(ConsoleColor.greenBright("[API][CACHE][MAP_" + mapId + "] Cache hit"));
+            let mapData = apiCache.get("map_" + mapId);
+            res.json(serializeResponse(mapData)); 
+            //return mapData;
+        }else{
+            log(ConsoleColor.greenBright("[API][CACHE][MAP_" + mapId + "] Cache miss"));
+            const credentials = await get_raw_auth();
+            const session = await lc.createHttpSession(credentials)
+            const mapData = await lc.createHttp2Request({
+                method: 'GET',
+                url: 'lol-maps/v1/map/' + mapId
+            }, session, credentials);
+            session.close()
+            if(!mapData.ok){
+                log(ConsoleColor.red("[API][GET-MAP][ERROR] The provided mapId is invalid."))
+                res.json(serializeResponse(null, 400, "The provided mapId is invalid."));
+                return;
+            }
+            if(apiCache.set("map_" + mapId, mapData.json())){
+                log(ConsoleColor.greenBright("[API][CACHE][MAP_" + mapId + "] Setted cache"));
+            }else{
+                log(ConsoleColor.red("[API][CACHE][MAP_" + mapId + "][ERROR] Could not set cache"));
+            }
+            res.json(serializeResponse(mapData.json()));
+            //return queueData.json();
+        }
+    }else{
+        log(ConsoleColor.red("[API][GET-MAP][ERROR] No mapId provided."))
+        res.json(serializeResponse(null, 400, "No mapId provided in the body of the request."));
+        return;
+    }    
+}
 exports.get_auth_info = get_auth_info;
 exports.user_info = user_info;
 exports.queues = queues; 
@@ -651,3 +749,5 @@ exports.startMatchmaking = startMatchmaking;
 exports.stopMatchmaking = stopMatchmaking;
 exports.acceptReadyCheck = acceptReadyCheck;
 exports.declineReadyCheck = declineReadyCheck;
+exports.getMap = getMap;
+exports.getUserInfobyId = getUserInfobyId;

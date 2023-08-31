@@ -87,6 +87,14 @@ app.post("/api/get-asset", (req, res) => {
   log("[API][ASSET] GET: /get_asset")
   LCU_Api.getAsset(req, res)
 })
+app.post("/api/get-map", (req, res) => {
+  log("[API][ASSET] GET: /get_map")
+  LCU_Api.getMap(req, res)
+})
+app.post("/api/get-summoner-by-id", (req, res) => {
+  log("[API][GET-USER-BY-SUMM-ID] POST: /get-summoner-by-id")
+  LCU_Api.getUserInfobyId(req, res)
+})
   
 app.get('/', (req,res) => {
     res.send('App Works !!!!');
