@@ -417,11 +417,37 @@ async function initSubs(){
             socket.emit("exitedLobby");
         }else if(eventType == "Create"){
             log(ConsoleColor.green("[API][WS][CLIENT][LOBBY] Created lobby"))
-            
+            let lobbyDataCache = {
+                gameMode: event.data.gameConfig.gameMode,
+                mapId: event.data.gameConfig.mapId,
+                queueId: event.data.gameConfig.queueId,
+                maxTeamSize: event.data.gameConfig.maxTeamSize,
+                maxLobbySize: event.data.gameConfig.maxLobbySize,
+                partyType: event.data.partyType,
+                //membersCount: Object.keys(event.data.members[i]).length
+                membersCount: event.data.members.length,
+                members: event.data.members
+            }
+            apiCache.set("lobbyUpdateData", lobbyDataCache)
             socket.emit("createdLobby");
         }else if(eventType == "Update"){
-            log(ConsoleColor.green("[API][WS][CLIENT][LOBBY] Updated lobby"))
-            socket.emit("updatedLobby");
+            log(ConsoleColor.red("[API][WS][CLIENT][LOBBY] Updated lobby"))
+            let lobbyDataCache = {
+                gameMode: event.data.gameConfig.gameMode,
+                mapId: event.data.gameConfig.mapId,
+                queueId: event.data.gameConfig.queueId,
+                maxTeamSize: event.data.gameConfig.maxTeamSize,
+                maxLobbySize: event.data.gameConfig.maxLobbySize,
+                partyType: event.data.partyType,
+                //membersCount: Object.keys(event.data.members[i]).length
+                membersCount: event.data.members.length,
+                members: event.data.members
+            }
+            if(JSON.stringify(apiCache.get("lobbyUpdateData")) != JSON.stringify(lobbyDataCache)){
+                apiCache.set("lobbyUpdateData", lobbyDataCache)
+                socket.emit("updatedLobby");
+            }
+            
         }
         // poziciok: UTILITY - support, MIDDLE - mid, BOTTOM - bot, TOP - top, JUNGLE - jg
         /*console.log("LOBBY EVENT:")

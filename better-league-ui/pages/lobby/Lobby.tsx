@@ -14,7 +14,7 @@ export enum ReadyCheckState {
 
 export default function Lobby(props: any) {
 	let socket = props.socket
-	const [loadedLobby, setLoadedLobby] = useState(null)
+	const [loadedLobby, setLoadedLobby] = useState<any>(null)
 	const [matchMakingStarted, setMatchMakingStarted] = useState(false)
 	const [timeElapsed, setTimeElapsed] = useState(0)
 	const [timeEstimated, setTimeEstimated] = useState(0)
@@ -25,7 +25,7 @@ export default function Lobby(props: any) {
 	)
 	//const [currentQueueData, setCurrentQueueData] = useState(null)
 	const [mapData, setMapData] = useState<any>(null)
-
+	const [lobbyUpdating, setLobbyUpdating] = useState(false)
 	const exitLobby = async () => {
 		let success = await callAPI("exit-lobby", "POST", {}, {})
 	}
@@ -46,9 +46,9 @@ export default function Lobby(props: any) {
 	}
 	useEffect(() => {
 		document.title = "BetterLeague - Lobby"
-		if (loadedLobby == null) {
-			fetchLobby()
-		}
+		//if (loadedLobby == null) {
+		fetchLobby()
+		//}
 		socket.on("updatedLobbySearch", (data: any) => {
 			setTimeElapsed(data.timeElapsed)
 			setTimeEstimated(data.timeEstimated)
@@ -59,9 +59,12 @@ export default function Lobby(props: any) {
 			setReadyCheckPopup(true)
 		})
 		socket.on("updatedLobby", () => {
+			setLobbyUpdating(true)
+			console.log("lobby update received")
 			fetchLobby()
 		})
-	})
+	}, [])
+
 	async function chooseReadyCheck(response: ReadyCheckState) {
 		setReadyCheckAccept(response)
 		if (response == ReadyCheckState.Accepted) {
@@ -128,6 +131,7 @@ export default function Lobby(props: any) {
 			members: members,
 			queueData: data.gameConfig.queueData,
 			maxTeamSize: data.gameConfig.maxTeamSize,
+			showPositionSelector: data.gameConfig.showPositionSelector,
 		}
 		//setCurrentQueueData(data.gameConfig.queueData)
 		fetchMapData(data.gameConfig.queueData)
@@ -156,14 +160,15 @@ export default function Lobby(props: any) {
 				<></>
 			)}
 			<div className={style.lobbyContainer}>
-				{loadedLobby == null || mapData == null ? (
+				{loadedLobby == null ? (
 					"Loading.."
 				) : (
 					<LobbyContainer
 						lobby={loadedLobby}
-						showPositionSelector={mapData.Q_showPositionSelector}
+						showPositionSelector={loadedLobby.showPositionSelector}
 					/>
 				)}
+
 				<LobbyUser />
 				{/*
           <button onClick={exitLobby}>Exit lobby</button>

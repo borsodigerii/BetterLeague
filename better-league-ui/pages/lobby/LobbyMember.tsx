@@ -6,6 +6,11 @@ import style from "./lobbyMember.module.css"
 import { AssetType, getAssetUrlById } from "../api/getAsset"
 
 export default function LobbyMember(props: any) {
+	/*console.log(
+		"rendered " +
+			(props.member != null ? props.member.summonerName : "null")
+	)*/
+	const localMember: boolean = props.localMember
 	const [profileIcon, setProfileIcon] = useState("")
 	const [name, setName] = useState("")
 	const [summonerIconId, setSummonerIconId] = useState(0)
@@ -15,10 +20,10 @@ export default function LobbyMember(props: any) {
 
 	//let userData = callAPI("get-summoner-by-id", "POST", {}, {summonerId: member.summonerId})
 	useEffect(() => {
-		if (profileIcon == "" && props.member !== null) {
+		if (props.member !== null) {
 			const fetchIcon = async () => {
 				let member = props.member
-
+				//console.log("useEffect rerender for: " + member.summonerName)
 				setName(member.summonerName)
 				setSummonerIconId(member.summonerIconId)
 				setSummonerId(member.summonerId)
@@ -30,7 +35,7 @@ export default function LobbyMember(props: any) {
 				)
 				let profIcon = await getAssetUrlById(
 					AssetType.ProfileIcon,
-					summonerIconId
+					member.summonerIconId
 				)
 				if (typeof profIcon == "string") {
 					setProfileIcon(profIcon)
@@ -38,13 +43,12 @@ export default function LobbyMember(props: any) {
 			}
 			fetchIcon()
 		}
-	})
+	}, [props.member])
 
 	return (
 		<div
 			className={
-				style.lobbyPlayer +
-				(summonerId == props.localMember ? " " + style.local : "")
+				style.lobbyPlayer + (localMember ? " " + style.local : "")
 			}
 		>
 			{props.member !== null ? (
@@ -62,19 +66,10 @@ export default function LobbyMember(props: any) {
 								alt=""
 							/>
 						</div>
-						<div
-							className={
-								style.profileName +
-								(summonerId == props.localMember
-									? " " + style.local
-									: "")
-							}
-						>
-							{name}
-						</div>
+						<div className={style.profileName}>{name}</div>
 					</div>
 					<div className={style.profileRIGHT}>
-						{props.showPositionSelector == true ? (
+						{props.showPositionSelector == true && !localMember ? (
 							<>
 								{firstPosition == PlayerPosition.TOP ? (
 									<img
@@ -97,6 +92,12 @@ export default function LobbyMember(props: any) {
 								) : firstPosition == PlayerPosition.BOTTOM ? (
 									<img
 										src="lobby/icon-position-bottom.png"
+										alt=""
+										className={style.firstPosition}
+									/>
+								) : firstPosition == PlayerPosition.FILL ? (
+									<img
+										src="lobby/icon-position-fill.png"
 										alt=""
 										className={style.firstPosition}
 									/>
@@ -128,6 +129,12 @@ export default function LobbyMember(props: any) {
 								) : secondPosition == PlayerPosition.BOTTOM ? (
 									<img
 										src="lobby/icon-position-bottom-member.png"
+										alt=""
+										className={style.secondPosition}
+									/>
+								) : secondPosition == PlayerPosition.FILL ? (
+									<img
+										src="lobby/icon-position-fill-member.png"
 										alt=""
 										className={style.secondPosition}
 									/>

@@ -58,7 +58,7 @@ export default function LobbyBreadCrumb(props: any) {
 				/>
 			</div>
 			<div className={style.queueIcon}>
-				<video autoPlay loop width="100">
+				<video autoPlay loop width="100" muted>
 					<source src={mapData.M_icon} type="video/webm" />
 				</video>
 			</div>

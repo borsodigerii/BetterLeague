@@ -13,7 +13,8 @@ import { NavBarIconLinkStruct, NavBarLinkStruct } from "@/navbar/NavBar"
 import NavBar from "@/navbar/NavBar"
 
 import { socket } from "./socket-io"
-import Settings, { Setting } from "./Settings"
+import Settings from "./Settings"
+import { BL_Settings, Setting } from "@/settings/BL_Settings"
 
 const inter = Inter({ subsets: ["latin"] })
 const sc = socket.connect()
@@ -24,13 +25,12 @@ export default function Home() {
 	const [initialized, setInitialized] = useState(false)
 	const [userData, setUserData] = useState({ payload: null })
 	const [startedInit, setStartedInit] = useState(false)
-	const [playButtonName, setPlayButtonName] = useState("Play")
 	const [blueEssence, setBlueEssence] = useState(0)
 	const [riotPoints, setRiotPoints] = useState(0)
 	const [currentQueue, setCurrentQueue] = useState(null)
-
+	const [isCurrentlyInLobby, setIsInLobby] = useState(false)
 	//SETTINGS
-	const [setting_autoReadyCheck, setSetting_autoReadyCheck] = useState(false)
+	/*const [setting_autoReadyCheck, setSetting_autoReadyCheck] = useState(false)
 
 	const settingsList: Setting[] = [
 		{
@@ -39,10 +39,10 @@ export default function Home() {
 			value: setting_autoReadyCheck,
 			stateHandler: setSetting_autoReadyCheck,
 		},
-	]
+	]*/
 
 	//-------
-	function setSetting(identifier: string, value: boolean) {
+	/*function setSetting(identifier: string, value: boolean) {
 		settingsList.map((setting: Setting) => {
 			if (setting.identifier == identifier) {
 				localStorage.setItem(setting.identifier, value.toString())
@@ -62,11 +62,14 @@ export default function Home() {
 				setting_autoReadyCheck.toString()
 			)
 		}
-	}
+	}*/
 	//SETTINGS
 
 	const [navigation, setNavigation] = useState("home")
-
+	async function isInLobby() {
+		let data = await callAPI("isInLobby", "GET", {})
+		return data.payload
+	}
 	const initApp = async () => {
 		console.log("[INIT] Init started..")
 		if (!startedInit) {
@@ -82,8 +85,12 @@ export default function Home() {
 			let userdata = await callAPI("user-info", "GET", {})
 			setUserData(userdata)
 			if (typeof window !== "undefined") {
-				initSettings()
+				//initSettings()
+				BL_Settings.init()
 			}
+
+			let _isInLobby: boolean = await isInLobby()
+			setIsInLobby(_isInLobby)
 
 			setInitialized(true)
 		}
@@ -97,26 +104,29 @@ export default function Home() {
 		})
 		socket.on("createdLobby", (data: any) => {
 			setNavigation("lobby")
-			setPlayButtonName("Party")
+			setIsInLobby(true)
 		})
 		socket.on("exitedLobby", () => {
 			setNavigation("home")
-			setPlayButtonName("Play")
+			setIsInLobby(false)
 		})
-	}, [socket])
+	}, [])
 	function changeNavigation(slug: string) {
 		setNavigation(slug)
 	}
-	async function isInLobby() {
-		let data = await callAPI("isInLobby", "GET", {})
-		return data.payload
-	}
+
 	let finalResult = []
 	let links: NavBarLinkStruct[] = [
 		{
 			link: "create_lobby",
-			displayName: playButtonName,
-			class: ["playButton"],
+			displayName: isCurrentlyInLobby ? "Party" : "Play",
+			class: [
+				"playButton",
+				isCurrentlyInLobby ? "party" : "",
+				navigation == "lobby" || navigation == "create_lobby"
+					? "grayscale"
+					: "",
+			],
 		},
 		{
 			link: "home",
@@ -176,7 +186,7 @@ export default function Home() {
 			finalResult.push(
 				<>
 					<CreateLobby
-						isInLobby={isInLobby}
+						isInLobby={isCurrentlyInLobby}
 						changeNav={changeNavigation}
 					/>
 				</>
@@ -194,7 +204,7 @@ export default function Home() {
 		case "settings":
 			finalResult.push(
 				<>
-					<Settings settings={settingsList} setSetting={setSetting} />
+					<Settings />
 				</>
 			)
 			break

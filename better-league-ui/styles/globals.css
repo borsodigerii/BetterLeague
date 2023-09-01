@@ -24,6 +24,65 @@ main{
 html{
   background-color: var(--base-dark-blue);
 }
+
 .playButton button{
   padding: 0 !important;
+}
+.playButton span{
+  position: relative;
+  background: transparent;
+  z-index: 10;
+  transition: all .2s ease;
+}
+.playButton.grayscale span{
+  filter: grayscale();
+  color: gray;
+}
+.playButton.grayscale button{
+  cursor: unset;
+}
+.playButton.party span{
+  position: relative;
+  background: transparent;
+  border-color: var(--base-orange);
+}
+.playButton span .partyBg, .playButton span .playBg{
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: bottom;
+  filter: contrast(1.5);
+}
+.playButton span .partyBg{
+  filter: saturate(10) brightness(2) contrast(50);
+  object-position: top;
+}
+.playButton.party span .partyBg{
+  display: block;
+}
+.playButton.party span .playBg{
+  display: none;
+}
+.playButton span .partyBg{
+  display: none;
+}
+.playButton span .playBg{
+  display: block;
+}
+.playButton:not(.grayscale):hover span{
+  transition: box-shadow .2s ease;
+  box-shadow: 0px 0px 8px 3px #48abe0;
+}
+.playButton.party:not(.grayscale):hover span{
+  box-shadow: 0px 0px 8px 3px var(--base-orange);
+}
+.playButton:hover button{
+  transform: unset;
+}
+.playButton img{
+  z-index: 20;
 }

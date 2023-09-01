@@ -1,0 +1,7 @@
+[
+    {
+        "label": "Automatically accept ready check",
+        "slug": "autoReadyCheck",
+        "default": false
+    }
+]

@@ -2,6 +2,7 @@ import LobbyMember from "./LobbyMember"
 import style from "./lobby.module.css"
 
 export default function LobbyContainer(props: any) {
+	console.log("rendered lobbycontainer")
 	let lobbyData = props.lobby
 	let members = lobbyData.members
 	let localMemberId = lobbyData.localMember.summonerId
@@ -17,8 +18,15 @@ export default function LobbyContainer(props: any) {
 	members.forEach((member: any) => {
 		display.push(
 			<LobbyMember
-				member={member}
-				localMember={localMemberId}
+				member={{ ...member }}
+				localMember={localMemberId == member.summonerId ? true : false}
+				showPositionSelector={props.showPositionSelector}
+			/>
+		)
+		display.push(
+			<LobbyMember
+				member={{ ...member }}
+				localMember={false}
 				showPositionSelector={props.showPositionSelector}
 			/>
 		)
@@ -31,7 +39,7 @@ export default function LobbyContainer(props: any) {
 			display.push(
 				<LobbyMember
 					member={null}
-					localMember={localMemberId}
+					localMember={false}
 					showPositionSelector={props.showPositionSelector}
 				/>
 			)
