@@ -5,6 +5,7 @@ export enum PlayerPosition {
 	TOP,
 	JUNGLE,
 	FILL,
+	UNSELECTED,
 }
 
 export function parsePlayerPosition(position: string): PlayerPosition {
@@ -49,8 +50,12 @@ export function parsePlayerPosition(position: string): PlayerPosition {
 			return PlayerPosition.UTILITY
 		case "support":
 			return PlayerPosition.UTILITY
-		default:
+		case "FILL":
 			return PlayerPosition.FILL
+		case "fill":
+			return PlayerPosition.FILL
+		default:
+			return PlayerPosition.UNSELECTED
 	}
-	return PlayerPosition.FILL
+	return PlayerPosition.UNSELECTED
 }

@@ -23,13 +23,13 @@ export default function LobbyContainer(props: any) {
 				showPositionSelector={props.showPositionSelector}
 			/>
 		)
-		display.push(
+		/*display.push(
 			<LobbyMember
 				member={{ ...member }}
 				localMember={false}
 				showPositionSelector={props.showPositionSelector}
 			/>
-		)
+		)*/
 		count++
 	})
 	//if (count < lobbyData.maxTeamSize - 1) {

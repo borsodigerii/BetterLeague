@@ -581,6 +581,108 @@ async function initSubs(){
             }
         */
     })
+    ws.subscribe('/lol-champ-select/v1/session', (data, event) => {
+        let eventType = event.eventType
+        if(eventType == "Create"){
+            log(ConsoleColor.bgMagenta("[API][WS][CHAMP-SELECT] Created Champ select.."))
+            socket.emit("createdChampSelect")
+        }else if(eventType == "Update"){
+            log(ConsoleColor.bgMagenta("[API][WS][CHAMP-SELECT] Update received"))
+            socket.emit("updatedChampSelect", event.data)
+        }
+        // console.log( JSON.stringify(event) )
+        /*
+        EVENT:
+            {
+            "data": {
+                "actions": [
+                [
+                    {
+                    "actorCellId": 0,
+                    "championId": 0,
+                    "completed": false,
+                    "id": 1,
+                    "isAllyAction": true,
+                    "isInProgress": true,
+                    "pickTurn": 1,
+                    "type": "pick"
+                    }
+                ]
+                ],
+                "allowBattleBoost": false,
+                "allowDuplicatePicks": false,
+                "allowLockedEvents": false,
+                "allowRerolling": false,
+                "allowSkinSelection": true,
+                "bans": {
+                "myTeamBans": [],
+                "numBans": 0,
+                "theirTeamBans": []
+                },
+                "benchChampions": [],
+                "benchEnabled": false,
+                "boostableSkinCount": 1,
+                "chatDetails": {
+                "mucJwtDto": {
+                    "channelClaim": "",
+                    "domain": "",
+                    "jwt": "",
+                    "targetRegion": ""
+                },
+                "multiUserChatId": "c1~532ce07b9b0fd662ce769354c926ee30dbb7e79b",
+                "multiUserChatPassword": "HMLDbW8LsJIC3mU1"
+                },
+                "counter": -1,
+                "entitledFeatureState": {
+                "additionalRerolls": 0,
+                "unlockedSkinIds": []
+                },
+                "gameId": 0,
+                "hasSimultaneousBans": false,
+                "hasSimultaneousPicks": true,
+                "isCustomGame": true,
+                "isSpectating": false,
+                "localPlayerCellId": 0,
+                "lockedEventIndex": -1,
+                "myTeam": [
+                {
+                    "assignedPosition": "",
+                    "cellId": 0,
+                    "championId": 0,
+                    "championPickIntent": 0,
+                    "entitledFeatureType": "",
+                    "nameVisibilityType": "",
+                    "obfuscatedPuuid": "",
+                    "obfuscatedSummonerId": 0,
+                    "puuid": "",
+                    "selectedSkinId": 0,
+                    "spell1Id": 1,
+                    "spell2Id": 3,
+                    "summonerId": 64053626,
+                    "team": 1,
+                    "wardSkinId": -1
+                }
+                ],
+                "pickOrderSwaps": [],
+                "recoveryCounter": 0,
+                "rerollsRemaining": 0,
+                "skipChampionSelect": false,
+                "theirTeam": [],
+                "timer": {
+                "adjustedTimeLeftInPhase": 89744,
+                "internalNowInEpochMs": 1694206846156,
+                "isInfinite": false,
+                "phase": "BAN_PICK",
+                "totalTimeInPhase": 92744
+                },
+                "trades": []
+            },
+            "eventType": "Update",
+            "uri": "/lol-champ-select/v1/session"
+            }
+
+        */
+    })
 }
 async function getResources(){
     const credentials = await get_raw_auth();

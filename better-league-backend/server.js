@@ -9,14 +9,15 @@ const log = console.log;
 const repl = require("repl");
 const kill = require("tree-kill");
 const LCU_Api = require("./LCU/apiController");
-//const lc = require("league-connect")
-//const credentials = lc.authenticate();
+const lc = require("league-connect")
+
 //let client;
 
 const http = require('http');
 const server = http.createServer(app);
 const { Server } = require("socket.io");
 const { Console } = require('console');
+const { setTimeout } = require('timers');
 const io = new Server(server, {
   cors: {
     origin: "http://localhost:3000"
@@ -103,13 +104,53 @@ app.get('/', (req,res) => {
 app.listen(port, () => {
     log(`[SYS][INFO] Backend server listening on the port::${port}`);
     log('[SYS][INFO] Starting UI...')
+    initlCU()
+});
 
-    //client = new lc.LeagueClient(credentials);
+async function initlCU() {
+  if(await isClientConnected()){
     start_UI("npm", ["run", "dev"], "../better-league-ui/", function(output, exit_code) {
       log(ConsoleColor.blue("[UI][PROC] Process Finished."));
     });
+    
     LCU_Api.initSubs();
-});
+  }
+}
+
+async function isClientConnected(){
+  /*try{
+    const credentials = await lc.authenticate();
+    client = new lc.LeagueClient(credentials);
+    return true;
+  }catch (e){
+    if(e instanceof lc.ClientNotFoundError){
+      log(ConsoleColor.red("[SYS][LCU][CLIENT] Client is not yet connected. Retrying in 5 seconds.."))
+      sleep(10000)
+      return isClientConnected()
+    }else{
+      log(ConsoleColor.red("[SYS][LCU][CLIENT] Unknown error has ocurred: " + e.message))
+      return false
+    }
+  }*/
+  console.log(ConsoleColor.white("[SYS][LCU][CLIENT] Looking for League client.."));
+  clientCredentials = await lc.authenticate({
+    awaitConnection: true,
+    pollInterval: 5000,
+  });
+  const client = new lc.LeagueClient(clientCredentials)
+  console.log(ConsoleColor.green("[SYS][LCU][CLIENT] Client found!"));
+  return true;
+  // TODO: too early websocket conn-t megoldani
+}
+function sleep(milliseconds) {
+  var start = new Date().getTime();
+  for (var i = 0; i < 1e7; i++) {
+    if ((new Date().getTime() - start) > milliseconds){
+      break;
+    }
+  }
+}
+
 server.listen(4000, () => {
   log(ConsoleColor.bgBlack(ConsoleColor.yellow("[SYS][SOCKET-IO][INFO] Socket.IO server listening on port :4000")))
 })

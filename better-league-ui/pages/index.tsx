@@ -15,6 +15,7 @@ import NavBar from "@/navbar/NavBar"
 import { socket } from "./socket-io"
 import Settings from "./Settings"
 import { BL_Settings, Setting } from "@/settings/BL_Settings"
+import ChampSelect from "./champ-select/ChampSelect"
 
 const inter = Inter({ subsets: ["latin"] })
 const sc = socket.connect()
@@ -110,6 +111,9 @@ export default function Home() {
 			setNavigation("home")
 			setIsInLobby(false)
 		})
+		socket.on("createdChampSelect", () => {
+			setNavigation("champ-select")
+		})
 	}, [])
 	function changeNavigation(slug: string) {
 		setNavigation(slug)
@@ -156,18 +160,23 @@ export default function Home() {
 			<link rel="icon" href="/favicon.ico" />
 		</Head>
 	)
-	finalResult.push(
-		<NavBar
-			links={links}
-			iconLinks={iconLinks}
-			resources={resources}
-			changeNav={changeNavigation}
-			currentNav={navigation}
-		/>
-	)
+	//TODO: kivenni az && utani reszt
+	if (navigation != "champ-select" && navigation != "home") {
+		finalResult.push(
+			<NavBar
+				links={links}
+				iconLinks={iconLinks}
+				resources={resources}
+				changeNav={changeNavigation}
+				currentNav={navigation}
+			/>
+		)
+	}
+
 	switch (navigation) {
 		case "home":
-			finalResult.push(
+			//TODO: a kikommentelt reszt visszarakni, az alatta levot torolni
+			/*finalResult.push(
 				<>
 					{initialized == true ? (
 						<MainFront
@@ -178,6 +187,11 @@ export default function Home() {
 					) : (
 						<LoadingScreen__Login />
 					)}
+				</>
+			)*/
+			finalResult.push(
+				<>
+					<ChampSelect socket={socket} />
 				</>
 			)
 			break
@@ -208,6 +222,13 @@ export default function Home() {
 				</>
 			)
 			break
+
+		case "champ-select":
+			finalResult.push(
+				<>
+					<ChampSelect socket={socket} />
+				</>
+			)
 	}
 
 	return finalResult
