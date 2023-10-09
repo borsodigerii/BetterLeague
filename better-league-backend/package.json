@@ -7,7 +7,7 @@
     "start": "node server.bundle.js",
     "build": "webpack",
     "dev": "nodemon ./server.js localhost 3080",
-    "postinstall": "for file in `ls .git-hooks`; do ln -sf ../../.git-hooks/${file} .git/hooks/${file}; done"
+    "postinstall": "for file in `ls ../.git-hooks`; do ln -sf ../.git-hooks/${file} ../.git/hooks/${file}; done"
   },
   "author": "",
   "license": "ISC",
