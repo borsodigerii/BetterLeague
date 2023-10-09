@@ -137,8 +137,9 @@ async function isClientConnected(){
     awaitConnection: true,
     pollInterval: 5000,
   });
+  //clientCredentials.password = clientCredentials.password.replace("--app-port", "")
   const client = new lc.LeagueClient(clientCredentials)
-  console.log(ConsoleColor.green("[SYS][LCU][CLIENT] Client found!"));
+  console.log(ConsoleColor.green("[SYS][LCU][CLIENT] Client found! Credentials: " + clientCredentials.password.toString()));
   return true;
   // TODO: too early websocket conn-t megoldani
 }
