@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react"
 import style from "./breadCrumb.module.css"
 import callAPI from "../api/callAPI"
+import MapData from "../api/interfaces/MapData"
+import QueueData from "../api/interfaces/QueueData"
 
-export default function LobbyBreadCrumb(props: any) {
+export default function LobbyBreadCrumb(props: {mapData: MapData, queueData: QueueData, exitLobbyHandler: any}) {
 	/*const [mapData, setMapData] = useState<any>(null)
 
         useEffect(() => {
@@ -45,7 +47,7 @@ export default function LobbyBreadCrumb(props: any) {
 		setMapData(mapData)
 	}*/
 	let mapData = props.mapData
-
+	let queueData = props.queueData
 	return (
 		<div className={style.breadcrumbContainer}>
 			<div className={style.backButton}>
@@ -59,15 +61,15 @@ export default function LobbyBreadCrumb(props: any) {
 			</div>
 			<div className={style.queueIcon}>
 				<video autoPlay loop width="100" muted>
-					<source src={mapData.M_icon} type="video/webm" />
+					<source src={mapData.iconURL} type="video/webm" />
 				</video>
 			</div>
 			<div className={style.mapDataContainer}>
-				<div className={style.mapName}>{mapData.M_name}</div>
+				<div className={style.mapName}>{mapData.name}</div>
 				<div className={style.mapDetails}>
-					<span className={style.mapDetail}>{mapData.Q_name}</span>
-					<span className={style.mapDetail}>{mapData.Q_subType}</span>
-					<span className={style.mapDetail}>{mapData.Q_xVxText}</span>
+					<span className={style.mapDetail}>{queueData.name}</span>
+					<span className={style.mapDetail}>{queueData.description}</span>
+					<span className={style.mapDetail}>{queueData.playerVersusPlayerLabel}</span>
 				</div>
 			</div>
 		</div>

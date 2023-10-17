@@ -2,12 +2,12 @@
 import style from "styles/settings.module.css"
 import ReactSwitch from "react-switch"
 import { useEffect, useState } from "react"
-import { BL_Settings, Setting } from "@/settings/BL_Settings"
+import { BL__Settings, Setting } from "@/settings/BL__Settings"
 
 export default function Settings() {
 	const [settings, setSettings] = useState<Setting[]>()
 	useEffect(() => {
-		setSettings(BL_Settings.getAllSettings())
+		setSettings(BL__Settings.getAllSettings())
 	}, [])
 
 	return (
@@ -25,12 +25,12 @@ export default function Settings() {
 									{typeof setting.value === "boolean" ? (
 										<ReactSwitch
 											onChange={() => {
-												BL_Settings.setSetting(
+												BL__Settings.setSetting(
 													setting.slug,
 													!setting.value
 												)
 												setSettings(
-													BL_Settings.getAllSettings()
+													BL__Settings.getAllSettings()
 												)
 											}}
 											onColor="#c5a260"

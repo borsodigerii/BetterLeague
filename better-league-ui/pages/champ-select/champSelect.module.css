@@ -3,6 +3,7 @@
     height: 100vh;
     display: flex;
     flex-direction: row;
+    justify-content: space-between;
     align-items: center;
 }
 
@@ -20,11 +21,21 @@
     overflow: hidden;
     height: 100px;
 }
-.teamMember.local{
-
+.teamMember.local .memberData .memberName{
+    color: var(--base-brighter-orange);
 }
 .teamMember.local.picking{
 
+}
+.teamMember.picking::after{
+    content: '';
+    inset: 0;
+    position: absolute;
+    z-index: 10;
+    background: linear-gradient(0deg, rgba(255, 204, 0, 0.291) 0%, rgba(0,0,0,0) 100%);
+    animation-name: pickingAnimText;
+    animation-duration: 2000ms;
+    animation-iteration-count: infinite;
 }
 .teamMember .champIcon{
     position: absolute;
@@ -35,7 +46,13 @@
     z-index: 10;
     filter: brightness(90%);
     -webkit-mask-image: linear-gradient(to left, black 50%, transparent 100%);
-  mask-image: linear-gradient(to left, black 50%, transparent 100%);
+    mask-image: linear-gradient(to left, black 50%, transparent 100%);
+}
+.teamContainer.reversed .teamMember .champIcon{
+    left: unset;
+    right: 100px;
+    -webkit-mask-image: linear-gradient(to right, black 50%, transparent 100%);
+    mask-image: linear-gradient(to right, black 50%, transparent 100%);
 }
 .teamMember .champIcon img{
     width: 100%;
@@ -46,10 +63,58 @@
 .teamMember .memberData{
     position: relative;
     z-index: 20;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    flex-direction: column;
+    padding-left: 20px;
+    padding-right: 20px;
+    width: 100%;
+}
+.teamContainer.reversed .teamMember .memberData{
+    align-items: flex-end;
+    padding-left: unset;
+    
 }
 .teamMember .memberData .memberName{
+    font-size: 20px;
+    font-weight: bold;
+    font-family: sans-serif;
     
 }
 .teamMember .memberData .pickingLabel{
+    color: var(--base-orange);
+    animation-name: pickingAnimText;
+    animation-duration: 2000ms;
+    animation-iteration-count: infinite;
     
+}
+@keyframes pickingAnimText {
+    0% {
+        opacity: .4;
+    }
+    50%{
+        opacity: 1;
+    }
+    100%{
+        opacity: .4;
+    }
+}
+
+.phaseContainer{
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+}
+.phaseContainer *{
+    color: white;
+}
+.phaseContainer h2{
+    text-transform: uppercase;
+    font-size: 30px;
+}
+.phaseContainer span{
+    font-size: 26px;
+    font-weight: bold;
 }

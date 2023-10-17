@@ -2,9 +2,11 @@ import { useState, useEffect } from "react"
 import callAPI from "../api/callAPI"
 import LobbyCategoryContainer from "./LobbyCategoryContainer"
 import styles from "../../styles/main.module.css"
+import BL__API from "../api/callAPI"
+import QueueData, { QueueAvailability } from "../api/interfaces/QueueData"
 
 export default function CreateLobby(props: any) {
-	const [loadedQueues, setQueues] = useState(null)
+	const [loadedQueues, setQueues] = useState<[{type: String, queues: QueueData[]}] | null>(null)
 
 	useEffect(() => {
 		document.title = "BetterLeague - Create Lobby"
@@ -17,13 +19,13 @@ export default function CreateLobby(props: any) {
 					return
 					//console.log("props.isInLobby() = " + props.isInLobby())
 				}
-				let queues: any = []
-				let gamemodes: any = {}
-				let count = 0
-				let queuesResponse = await callAPI("queues", "GET", {})
-				queuesResponse.payload.forEach((queue: any) => {
-					if (queue.queueAvailability == "Available") {
-						if (gamemodes[queue.gameMode] == undefined) {
+				let queues!: [{type: String, queues: QueueData[]}];
+				//let queuesResponse = await callAPI("queues", "GET", {})
+				let queuesResponse = await BL__API.GetQueues()
+				//queuesResponse.payload.forEach((queue: any) => {
+				queuesResponse.forEach((queue: QueueData) => {
+					/*if (queue.queueAvailability == QueueAvailability.Available) {
+						if (gamemodes.get(queue.gameMode) == undefined) {
 							gamemodes[queue.gameMode] = count++
 							queues.push({ type: queue.gameMode, queues: [] })
 						}
@@ -37,6 +39,18 @@ export default function CreateLobby(props: any) {
 							type: queue.type,
 						}
 						queues[gamemodes[queue.gameMode]].queues.push(queueData)
+					}*/
+					if(queue.queueAvailability == QueueAvailability.Available){
+						let found = false
+						queues.forEach(queueType => {
+							if(queueType.type == queue.gameMode){
+								queueType.queues.push(queue)
+								found = true
+							}
+						})
+						if(!found){
+							queues.push({type: queue.gameMode, queues: [queue]})
+						}
 					}
 				})
 				setQueues(queues)

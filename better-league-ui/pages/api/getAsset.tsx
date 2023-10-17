@@ -1,4 +1,4 @@
-import callAPI from "./callAPI"
+import { callAPI, callAPI__Raw } from "./callAPI"
 import urlFromStream from "./urlFromStream"
 
 export async function getAssetUrlById(
@@ -8,7 +8,7 @@ export async function getAssetUrlById(
 ) {
 	if (type === AssetType.SkinSplash) {
 		let champId = id.toString().substring(0, id.toString().length - 3)
-		let stream = await callAPI(
+		let stream = callAPI__Raw(
 			"get-asset",
 			"POST",
 			{},
@@ -21,13 +21,12 @@ export async function getAssetUrlById(
 					id +
 					"." +
 					filetype,
-			},
-			false
+			}
 		)
 		return await urlFromStream(stream)
 	} else if (type === AssetType.ChampionSplash) {
 		let champId = id
-		let stream = await callAPI(
+		let stream = callAPI__Raw(
 			"get-asset",
 			"POST",
 			{},
@@ -40,13 +39,12 @@ export async function getAssetUrlById(
 					champId +
 					"000." +
 					filetype,
-			},
-			false
+			}
 		)
 		return await urlFromStream(stream)
 	} else if (type === AssetType.ChampionTile) {
 		let champId = id
-		let stream = await callAPI(
+		let stream = callAPI__Raw(
 			"get-asset",
 			"POST",
 			{},
@@ -59,20 +57,18 @@ export async function getAssetUrlById(
 					champId +
 					"000." +
 					filetype,
-			},
-			false
+			}
 		)
 		return await urlFromStream(stream)
 	} else if (type == AssetType.ProfileIcon) {
-		let stream = await callAPI(
+		let stream = callAPI__Raw(
 			"get-asset",
 			"POST",
 			{},
 			{
 				plugin: "lol-game-data",
 				path: "/v1/profile-icons/" + id + "." + filetype,
-			},
-			false
+			}
 		)
 		return await urlFromStream(stream)
 	}
@@ -89,21 +85,19 @@ export async function getAssetUrlBySplashPath(
 		pathConst = pathConst + "/" + tokens[i]
 	}
 	if (type === AssetType.ChampionSplash || type === AssetType.SkinSplash) {
-		let stream = await callAPI(
+		let stream = callAPI__Raw(
 			"get-asset",
 			"POST",
 			{},
-			{ plugin: plugin, path: pathConst },
-			false
+			{ plugin: plugin, path: pathConst }
 		)
 		return await urlFromStream(stream)
 	} else if (type == AssetType.ProfileIcon) {
-		let stream = await callAPI(
+		let stream = callAPI__Raw(
 			"get-asset",
 			"POST",
 			{},
-			{ plugin: plugin, path: pathConst },
-			false
+			{ plugin: plugin, path: pathConst }
 		)
 		return await urlFromStream(stream)
 	}

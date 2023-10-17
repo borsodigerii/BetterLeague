@@ -1,7 +1,7 @@
 import { ReadyCheckState } from "./Lobby";
 import style from "./readycheck.module.css";
 
-export default function ReadyCheckPopup(props: any) {
+export default function ReadyCheckPopup(props: {time: number, status: ReadyCheckState, handler: any}) {
   return (
     <div className={style.readyCheckBackdrop}>
       <div className={style.readyCheckContainer}>

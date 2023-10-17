@@ -14,88 +14,55 @@ import NavBar from "@/navbar/NavBar"
 
 import { socket } from "./socket-io"
 import Settings from "./Settings"
-import { BL_Settings, Setting } from "@/settings/BL_Settings"
+import { BL__Settings, Setting } from "@/settings/BL__Settings"
 import ChampSelect from "./champ-select/ChampSelect"
+import BL__API from "./api/callAPI"
+import AuthPack from "./api/interfaces/AuthPack"
+import UserData from "./api/interfaces/UserData"
 
 const inter = Inter({ subsets: ["latin"] })
 const sc = socket.connect()
 export default function Home() {
 	const [port, setPort] = useState(0)
 	const [password, setPassword] = useState("")
-	const [authPack, setAuthPack] = useState({ port: null, pass: null })
+	const [authPack, setAuthPack] = useState<AuthPack>({password: "", port: -1})
 	const [initialized, setInitialized] = useState(false)
-	const [userData, setUserData] = useState({ payload: null })
+	const [userData, setUserData] = useState<UserData | null>(null)
 	const [startedInit, setStartedInit] = useState(false)
 	const [blueEssence, setBlueEssence] = useState(0)
 	const [riotPoints, setRiotPoints] = useState(0)
 	const [currentQueue, setCurrentQueue] = useState(null)
 	const [isCurrentlyInLobby, setIsInLobby] = useState(false)
-	//SETTINGS
-	/*const [setting_autoReadyCheck, setSetting_autoReadyCheck] = useState(false)
-
-	const settingsList: Setting[] = [
-		{
-			name: "Automatically accept ready check",
-			identifier: "setting_autoReadyCheck",
-			value: setting_autoReadyCheck,
-			stateHandler: setSetting_autoReadyCheck,
-		},
-	]*/
-
-	//-------
-	/*function setSetting(identifier: string, value: boolean) {
-		settingsList.map((setting: Setting) => {
-			if (setting.identifier == identifier) {
-				localStorage.setItem(setting.identifier, value.toString())
-				setting.stateHandler(value)
-			}
-		})
-	}
-	function initSettings() {
-		const stored_setting_autoReadyCheck = localStorage.getItem(
-			"setting_autoReadyCheck"
-		)
-		if (stored_setting_autoReadyCheck) {
-			setSetting_autoReadyCheck(JSON.parse(stored_setting_autoReadyCheck))
-		} else {
-			localStorage.setItem(
-				"setting_autoReadyCheck",
-				setting_autoReadyCheck.toString()
-			)
-		}
-	}*/
-	//SETTINGS
+	
 
 	const [navigation, setNavigation] = useState("home")
 	async function isInLobby() {
-		let data = await callAPI("isInLobby", "GET", {})
-		return data.payload
+		return await BL__API.isInLobby()
 	}
 	const initApp = async () => {
 		console.log("[INIT] Init started..")
 		if (!startedInit) {
 			setStartedInit(true)
-			let response = await callAPI("get-auth-info", "GET", {})
-			setPort(response.payload.port)
-			setPassword(response.payload.password)
-			let authPack = {
-				port: response.payload.port,
-				pass: response.payload.password,
-			}
+			//let response = await callAPI("get-auth-info", "GET", {})
+			let authPack = await BL__API.GetAuthPack()
+			setPort(authPack.port)
+			setPassword(authPack.password)
 			setAuthPack(authPack)
-			let userdata = await callAPI("user-info", "GET", {})
+			//let userdata = await callAPI("user-info", "GET", {})
+			let userdata = await BL__API.GetUserData()
 			setUserData(userdata)
 			if (typeof window !== "undefined") {
 				//initSettings()
-				BL_Settings.init()
+				BL__Settings.init()
 			}
 
 			let _isInLobby: boolean = await isInLobby()
 			setIsInLobby(_isInLobby)
 
 			setInitialized(true)
+			console.log("[INIT] Init finished")
 		}
-		console.log("[INIT] Init finished")
+		
 	}
 	if (!startedInit) initApp()
 
@@ -161,7 +128,8 @@ export default function Home() {
 		</Head>
 	)
 	//TODO: kivenni az && utani reszt
-	if (navigation != "champ-select" && navigation != "home") {
+	//if (navigation != "champ-select" && navigation != "home") {
+	if (navigation != "champ-select") {
 		finalResult.push(
 			<NavBar
 				links={links}
@@ -176,24 +144,24 @@ export default function Home() {
 	switch (navigation) {
 		case "home":
 			//TODO: a kikommentelt reszt visszarakni, az alatta levot torolni
-			/*finalResult.push(
+			finalResult.push(
 				<>
 					{initialized == true ? (
 						<MainFront
 							auth={authPack}
-							user={userData.payload}
+							user={userData}
 							changeNav={changeNavigation}
 						/>
 					) : (
 						<LoadingScreen__Login />
 					)}
 				</>
-			)*/
-			finalResult.push(
+			)
+			/*finalResult.push(
 				<>
 					<ChampSelect socket={socket} />
 				</>
-			)
+			)*/
 			break
 
 		case "create_lobby":

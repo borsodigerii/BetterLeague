@@ -1,7 +1,8 @@
+import LobbyData from "../api/interfaces/LobbyData"
 import LobbyMember from "./LobbyMember"
 import style from "./lobby.module.css"
 
-export default function LobbyContainer(props: any) {
+export default function LobbyContainer(props: {lobby: LobbyData}) {
 	console.log("rendered lobbycontainer")
 	let lobbyData = props.lobby
 	let members = lobbyData.members
@@ -20,7 +21,7 @@ export default function LobbyContainer(props: any) {
 			<LobbyMember
 				member={{ ...member }}
 				localMember={localMemberId == member.summonerId ? true : false}
-				showPositionSelector={props.showPositionSelector}
+				showPositionSelector={lobbyData.showPositionSelector}
 			/>
 		)
 		/*display.push(
@@ -40,7 +41,7 @@ export default function LobbyContainer(props: any) {
 				<LobbyMember
 					member={null}
 					localMember={false}
-					showPositionSelector={props.showPositionSelector}
+					showPositionSelector={lobbyData.showPositionSelector}
 				/>
 			)
 		}

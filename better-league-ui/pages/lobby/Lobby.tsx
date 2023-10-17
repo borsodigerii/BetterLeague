@@ -5,6 +5,10 @@ import ReadyCheckPopup from "./ReadyCheckPopup"
 import style from "./lobby.module.css"
 import LobbyBreadCrumb from "./LobbyBreadCrumb"
 import LobbyUser from "./LobbyUser"
+import BL__API from "../api/callAPI"
+import MapData from "../api/interfaces/MapData"
+import LobbyData from "../api/interfaces/LobbyData"
+import QueueData from "../api/interfaces/QueueData"
 
 export enum ReadyCheckState {
 	Popup,
@@ -14,7 +18,7 @@ export enum ReadyCheckState {
 
 export default function Lobby(props: any) {
 	let socket = props.socket
-	const [loadedLobby, setLoadedLobby] = useState<any>(null)
+	const [loadedLobby, setLoadedLobby] = useState<LobbyData | null>(null)
 	const [matchMakingStarted, setMatchMakingStarted] = useState(false)
 	const [timeElapsed, setTimeElapsed] = useState(0)
 	const [timeEstimated, setTimeEstimated] = useState(0)
@@ -24,25 +28,29 @@ export default function Lobby(props: any) {
 		ReadyCheckState.Popup
 	)
 	//const [currentQueueData, setCurrentQueueData] = useState(null)
-	const [mapData, setMapData] = useState<any>(null)
+	const [mapData, setMapData] = useState<MapData | null>(null)
+	const [queueData, setQueueData] = useState<QueueData | null>(null)
 	const [lobbyUpdating, setLobbyUpdating] = useState(false)
 	const exitLobby = async () => {
-		let success = await callAPI("exit-lobby", "POST", {}, {})
+		//let success = await callAPI("exit-lobby", "POST", {}, {})
+		BL__API.ExitLobby()
 	}
 	const startMatchMaking = async () => {
 		setReadyCheckAccept(ReadyCheckState.Popup)
 		setTimeElapsed(0)
 		setTimeEstimated(0)
-		let success = await callAPI("start-matchmaking", "POST", {}, {})
+		/*let success = await callAPI("start-matchmaking", "POST", {}, {})
 		if (success.response.code == 200) {
 			setMatchMakingStarted(true)
-		}
+		}*/
+		if(await BL__API.StartMatchMaking()) setMatchMakingStarted(true)
 	}
 	const stopMatchMaking = async () => {
-		let success = await callAPI("stop-matchmaking", "POST", {}, {})
+		/*let success = await callAPI("stop-matchmaking", "POST", {}, {})
 		if (success.response.code == 200) {
 			setMatchMakingStarted(false)
-		}
+		}*/
+		if(await BL__API.StopMatchMaking()) setMatchMakingStarted(false)
 	}
 	useEffect(() => {
 		document.title = "BetterLeague - Lobby"
@@ -68,18 +76,22 @@ export default function Lobby(props: any) {
 	async function chooseReadyCheck(response: ReadyCheckState) {
 		setReadyCheckAccept(response)
 		if (response == ReadyCheckState.Accepted) {
-			let success = await callAPI("accept-ready-check", "POST", {}, {})
+			/*let success = await callAPI("accept-ready-check", "POST", {}, {})
 			if (success.response.code == 200) {
 				setMatchMakingStarted(false)
-			}
+			}*/
+			if(await BL__API.ReadyCheckAccept()) setMatchMakingStarted(false)
+			
 		} else if (response == ReadyCheckState.Declined) {
-			let success = await callAPI("decline-ready-check", "POST", {}, {})
+			/*let success = await callAPI("decline-ready-check", "POST", {}, {})
 			if (success.response.code == 200) {
 				setMatchMakingStarted(false)
-			}
+			}*/
+			if(await BL__API.ReadyCheckDecline()) setMatchMakingStarted(false)
+			
 		}
 	}
-	const fetchMapData = async (queueData: any) => {
+	/*const fetchMapData = async (queueData: any) => {
 		let _maxPlayers = queueData.numPlayersPerTeam
 		let _playerVersusPlayer = _maxPlayers + "v" + _maxPlayers
 
@@ -88,12 +100,13 @@ export default function Lobby(props: any) {
 		let _subType = queueData.description // pl "Draft Pick"
 
 		let mapId = queueData.mapId
-		let map = await callAPI("get-map", "POST", {}, { mapID: mapId })
-		map = map.payload
+
+		let map: MapData = await BL__API.GetMapData(mapId)
+
 		// type: pl NORMAL
 		// Q_.. előjel: queue adat
 		// M_.. elpjel: map adat
-		let mapSlug = map.mapStringId // pl: SR
+		let mapSlug = map.mapSlug // pl: SR
 		let mapName = map.name // pl: "Summoner's Rift"
 
 		let mapIcon = "gamemodeAssets/" + mapSlug + "/iconAnimatedActive.webm"
@@ -112,9 +125,9 @@ export default function Lobby(props: any) {
 			M_lobbyBg: mapBackgroundLobby,
 		}
 		setMapData(mapData)
-	}
+	}*/
 	const fetchLobby = async () => {
-		let data = await callAPI("lobby", "GET", {})
+		/*let data = await callAPI("lobby", "GET", {})
 		data = data.payload
 		let members: any = []
 		data.members.forEach((member: any) => {
@@ -132,9 +145,12 @@ export default function Lobby(props: any) {
 			queueData: data.gameConfig.queueData,
 			maxTeamSize: data.gameConfig.maxTeamSize,
 			showPositionSelector: data.gameConfig.showPositionSelector,
-		}
+		}*/
+		let lobbyData: LobbyData = await BL__API.GetLobbyData()
 		//setCurrentQueueData(data.gameConfig.queueData)
-		fetchMapData(data.gameConfig.queueData)
+		//fetchMapData(lobbyData.queueData)
+		setMapData(lobbyData.mapData)
+		setQueueData(lobbyData.queueData)
 		setLoadedLobby(lobbyData)
 	}
 	return (
@@ -144,7 +160,7 @@ export default function Lobby(props: any) {
 					? {
 							background:
 								"linear-gradient( rgba(0, 40, 90, 0.55), rgba(0, 20, 50, 0.55) ), url(" +
-								mapData.M_lobbyBg +
+								mapData.lobbyBgURL +
 								")",
 					  }
 					: {}
@@ -154,6 +170,7 @@ export default function Lobby(props: any) {
 			{mapData ? (
 				<LobbyBreadCrumb
 					mapData={mapData}
+					queueData={queueData!}
 					exitLobbyHandler={exitLobby}
 				/>
 			) : (
@@ -165,7 +182,6 @@ export default function Lobby(props: any) {
 				) : (
 					<LobbyContainer
 						lobby={loadedLobby}
-						showPositionSelector={loadedLobby.showPositionSelector}
 					/>
 				)}
 

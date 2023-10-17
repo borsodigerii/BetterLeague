@@ -1,5 +1,6 @@
 :root{
   --base-orange: rgb(197, 162, 96);
+  --base-brighter-orange: rgb(222, 169, 73);
   --base-darker-orange: rgb(124, 102, 61);
   --base-dark-blue: #020126;
   --base-middle-blue: #040242;
@@ -16,6 +17,16 @@ main{
 }
 main{
   color: white;
+  max-width: 1800px;
+  margin: 0 auto;
+  left: 50% !important;
+  transform: translateX(-50%);
+}
+nav{
+  max-width: 1800px;
+  margin: 0 auto;
+  left: 50% !important;
+  transform: translateX(-50%);
 }
 *{
   box-sizing: border-box;
@@ -23,6 +34,8 @@ main{
 }
 html{
   background-color: var(--base-dark-blue);
+  max-width: 1800px;
+  margin: 0 auto;
 }
 
 .playButton button{

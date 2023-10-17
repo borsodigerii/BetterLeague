@@ -1,18 +1,18 @@
-import DisplayBasicData from "./DisplayBasicData"
-import callAPI from "./api/callAPI"
 import {
 	AssetType,
 	getAssetUrlById,
 	getAssetUrlBySplashPath,
 } from "./api/getAsset"
-import urlFromStream from "./api/urlFromStream"
 import { useState, useEffect } from "react"
 import styles from "styles/main.module.css"
+import AuthPack from "./api/interfaces/AuthPack"
+import UserData from "./api/interfaces/UserData"
+import Skin from "./api/interfaces/Skin"
 
-export default function MainFront(props: any) {
+export default function MainFront(props: {auth: AuthPack, user: UserData | null, changeNav: any}) {
 	let backgroundSplashPath = ""
-	props.user.skins.forEach((skin: any) => {
-		if (skin.id == props.user.backgroundSkinId) {
+	props.user!.skins.forEach((skin: Skin) => {
+		if (skin.id == props.user!.backgroundSkinId) {
 			backgroundSplashPath = skin.splashPath
 		}
 	})
@@ -31,7 +31,7 @@ export default function MainFront(props: any) {
 				}
 				let profileIcon = await getAssetUrlById(
 					AssetType.ProfileIcon,
-					props.user.profileIconId
+					props.user!.profileIconId
 				)
 				if (typeof profileIcon == "string") {
 					setProfileIcon(profileIcon)
@@ -69,11 +69,11 @@ export default function MainFront(props: any) {
 					/>
 					<div>
 						<div className={styles.userName}>
-							{props.user.displayName}
+							{props.user!.displayName}
 							<span className={styles.userRegion}>#EUNE</span>
 						</div>
 						<div className={styles.userLevel}>
-							Lvl.{props.user.summonerLevel}
+							Lvl.{props.user!.summonerLevel}
 						</div>
 					</div>
 				</div>

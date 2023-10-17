@@ -7,6 +7,7 @@ export default function TeamContainer(props: any) {
 	const phase = props.phase
 	const team = props.team
 	const localPlayerCellId = props.localPlayerCellId
+	const reversed = props.reversed
 
 	let finalDisplay: any[] = []
 
@@ -20,6 +21,7 @@ export default function TeamContainer(props: any) {
 					actionArr.isInProgress
 				) {
 					// member is picking, should anim
+					console.log(actionArr.type)
 					isPicking = true
 					phase = actionArr.type
 				}
@@ -36,5 +38,5 @@ export default function TeamContainer(props: any) {
 		)
 	})
 
-	return <div className={style.teamContainer}>{finalDisplay}</div>
+	return <div className={style.teamContainer + (reversed ? " " + style.reversed : "")}>{finalDisplay}</div>
 }

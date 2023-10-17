@@ -7,7 +7,7 @@ export interface Setting {
 	value?: any
 }
 
-export abstract class BL_Settings {
+export abstract class BL__Settings {
 	public static init(): void {
 		settingsData.forEach((settingsObject: Setting) => {
 			const settingValue = localStorage.getItem(
