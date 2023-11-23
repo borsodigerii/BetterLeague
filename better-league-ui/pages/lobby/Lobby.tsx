@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react"
-import callAPI from "../api/callAPI"
 import LobbyContainer from "./LobbyContainer"
 import ReadyCheckPopup from "./ReadyCheckPopup"
 import style from "./lobby.module.css"
