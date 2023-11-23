@@ -96,6 +96,12 @@ app.post("/api/get-summoner-by-id", (req, res) => {
   log("[API][GET-USER-BY-SUMM-ID] POST: /get-summoner-by-id")
   LCU_Api.getUserInfobyId(req, res)
 })
+app.post("/api/stop-application", (req,res) => {
+  log("[API] Stop request received, sending close signal to electron app....")
+  LCU_Api.sendCloseSignal()
+  res.json({"response": {"code": 200, "message": "Stopping server..."}})
+  
+})
   
 app.get('/', (req,res) => {
     res.send('App Works !!!!');
@@ -108,13 +114,14 @@ app.listen(port, () => {
 });
 
 async function initlCU() {
-  if(await isClientConnected()){
+  /*if(await isClientConnected()){*/
     start_UI("npm", ["run", "dev"], "../better-league-ui/", function(output, exit_code) {
       log(ConsoleColor.blue("[UI][PROC] Process Finished."));
     });
     
+    //sleep(2);
     LCU_Api.initSubs();
-  }
+  //}
 }
 
 async function isClientConnected(){
@@ -143,7 +150,7 @@ async function isClientConnected(){
   return true;
   // TODO: too early websocket conn-t megoldani
 }
-function sleep(milliseconds) {
+async function sleep(milliseconds) {
   var start = new Date().getTime();
   for (var i = 0; i < 1e7; i++) {
     if ((new Date().getTime() - start) > milliseconds){
@@ -156,8 +163,15 @@ server.listen(4000, () => {
   log(ConsoleColor.bgBlack(ConsoleColor.yellow("[SYS][SOCKET-IO][INFO] Socket.IO server listening on port :4000")))
 })
 io.on("connection", (socket) => {
-  log(ConsoleColor.bgBlack(ConsoleColor.yellow("[SYS][SOCKET-IO][INFO] UI connected")))
-  LCU_Api.setSocket(socket)
+  if(socket.handshake.auth.token == "electron"){
+    // electron connect
+    log(ConsoleColor.bgBlack(ConsoleColor.yellow("[SYS][SOCKET-IO][INFO] ELECTRON APP connected")))
+    LCU_Api.setElectronSocket(socket)
+  }else{
+    log(ConsoleColor.bgBlack(ConsoleColor.yellow("[SYS][SOCKET-IO][INFO] UI connected")))
+    LCU_Api.setSocket(socket)
+  }
+  
 })
 function start_UI(command, args, cwdString, callback) {
   //log("Starting Process.");
@@ -195,10 +209,12 @@ async function stopServer(){
   UIPROCESS.stdout.pause();
   UIPROCESS.stdin.end();
   kill(UIPROCESS.pid);
-  setTimeout(() => {
+  //setTimeout(() => {
+    //await sleep(1000)
     log(ConsoleColor.green("[SYS][UI][PROC] UI process stopped, exiting."))
-    process.exit(0)
-  }, 1000);
+    return true;
+  //}, 1000);
+  
 }
 
 const cli = repl.start();

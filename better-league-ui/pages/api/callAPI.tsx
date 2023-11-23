@@ -253,4 +253,8 @@ export default abstract class BL__API{
     }
     return userData
   }
+
+  public static CloseApp(): void{
+    callAPI("stop-application", "POST", {}, {})
+  }
 }

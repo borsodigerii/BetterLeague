@@ -1,3 +1,4 @@
+import BL__API from '@/pages/api/callAPI'
 import NavBarIconLink from './NavBarIconLink'
 import NavBarLink from './NavBarLink'
 import style from './style/style.module.css'
@@ -41,7 +42,7 @@ export default function NavBar(props: any){
                             __
                         </div>
                         <div className={style.misc}>
-                            <img src="close_gray.png" style={{filter: "brightness(70%)"}}/>
+                            <img src="close_gray.png" style={{filter: "brightness(70%)"}} onClick={BL__API.CloseApp}/>
                         </div>
                     </div>
                     <div className={style.navResourcesContainer}>

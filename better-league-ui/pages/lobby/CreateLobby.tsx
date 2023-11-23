@@ -19,7 +19,7 @@ export default function CreateLobby(props: any) {
 					return
 					//console.log("props.isInLobby() = " + props.isInLobby())
 				}
-				let queues!: [{type: String, queues: QueueData[]}];
+				let queues: [{type: String, queues: QueueData[]}] = [] as unknown as [{type: String, queues: QueueData[]}];
 				//let queuesResponse = await callAPI("queues", "GET", {})
 				let queuesResponse = await BL__API.GetQueues()
 				//queuesResponse.payload.forEach((queue: any) => {

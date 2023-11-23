@@ -21,6 +21,7 @@
     "node-cache": "^5.1.2",
     "repl": "^0.1.3",
     "socket.io": "^4.7.1",
+    "socket.io-client": "^4.7.2",
     "tree-kill": "^1.2.2"
   },
   "devDependencies": {

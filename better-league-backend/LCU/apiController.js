@@ -9,9 +9,13 @@ const { getCred } = require('./getCred');
 const { getLCUWebSocket } = require("./websocket");
 
 let socket = null;
+let electronSocket = null;
 
 function setSocket(sc){
     socket = sc;
+}
+function setElectronSocket(sc){
+    electronSocket = sc
 }
 
 //const ws = getLCUWebSocket();
@@ -863,12 +867,17 @@ async function getMap(req, res){
         return;
     }    
 }
+
+function sendCloseSignal(){
+    electronSocket.emit("closeApplication")
+}
 exports.get_auth_info = get_auth_info;
 exports.user_info = user_info;
 exports.queues = queues; 
 exports.initSubs = initSubs;
 exports.createLobby = createLobby;
 exports.setSocket = setSocket;
+exports.setElectronSocket = setElectronSocket;
 exports.getLobbyInfo = getLobbyInfo;
 exports.exitLobby = exitLobby;
 exports.isInLobby = isInLobby;
@@ -879,3 +888,4 @@ exports.acceptReadyCheck = acceptReadyCheck;
 exports.declineReadyCheck = declineReadyCheck;
 exports.getMap = getMap;
 exports.getUserInfobyId = getUserInfobyId;
+exports.sendCloseSignal = sendCloseSignal;
