@@ -64,7 +64,7 @@ app.on('window-all-closed', () => {
 })
 
 socket.on("connect", () => {
-    console.log(ConsoleColor.yellow("[APP][SOCKET-IO] Connected to backed"))
+    console.log(ConsoleColor.yellow("[APP][SOCKET-IO] Connected to backend"))
 })
 socket.on("closeApplication", () => {
     console.log(ConsoleColor.green("[APP][SOCKET-IO] Received closing signal, initiating close"))
