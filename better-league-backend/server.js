@@ -9,6 +9,8 @@ const log = console.log;
 const repl = require("repl");
 const kill = require("tree-kill");
 const LCU_Api = require("./LCU/apiController");
+const LCUConnector = require('lcu-connector')
+const connector = new LCUConnector();
 const lc = require("league-connect")
 
 //let client;
@@ -92,6 +94,10 @@ app.post("/api/get-map", (req, res) => {
   log("[API][ASSET] GET: /get_map")
   LCU_Api.getMap(req, res)
 })
+app.get("/api/get-wallet", (req, res) => {
+  log("[API][WALLET] GET: /get_wallet")
+  LCU_Api.getWallet(req, res)
+})
 app.post("/api/get-summoner-by-id", (req, res) => {
   log("[API][GET-USER-BY-SUMM-ID] POST: /get-summoner-by-id")
   LCU_Api.getUserInfobyId(req, res)
@@ -115,12 +121,16 @@ app.listen(port, () => {
 
 async function initlCU() {
   /*if(await isClientConnected()){*/
+  //child_process.spawn("/Applications/")
+  connector.on('connect', (data) => {
     start_UI("npm", ["run", "dev"], "../better-league-ui/", function(output, exit_code) {
       log(ConsoleColor.blue("[UI][PROC] Process Finished."));
     });
     
     //sleep(2);
     LCU_Api.initSubs();
+  })
+  connector.start();
   //}
 }
 

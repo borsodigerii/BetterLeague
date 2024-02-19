@@ -55,7 +55,9 @@ export default function Home() {
 				//initSettings()
 				BL__Settings.init()
 			}
-
+			let wallet = await BL__API.GetWallet();
+			setBlueEssence(wallet.be)
+			setRiotPoints(wallet.rp)
 			let _isInLobby: boolean = await isInLobby()
 			setIsInLobby(_isInLobby)
 

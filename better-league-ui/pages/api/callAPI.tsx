@@ -225,6 +225,15 @@ export default abstract class BL__API{
     }
     return authPack
   }
+  public static async GetWallet(): Promise<{be: number, rp: number}> {
+    let response = await callAPI("get-wallet", "GET", {});
+    console.log("\n\n Wallet: " + JSON.stringify(response));
+    let wallet = {
+      be: response.payload.ip,
+      rp: response.payload.rp
+    }
+    return wallet;
+  }
   public static async GetUserData(): Promise<UserData>{
     let userdataRes = await callAPI("user-info", "GET", {})
     let userData: UserData = {

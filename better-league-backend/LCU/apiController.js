@@ -867,7 +867,24 @@ async function getMap(req, res){
         return;
     }    
 }
-
+async function getWallet(req, res){
+    const credentials = await get_raw_auth();
+    const session = await lc.createHttpSession(credentials)
+    const walletData = await lc.createHttp2Request({
+        method: 'GET',
+        url: '/lol-login/v1/wallet'
+    }, session, credentials);
+    session.close()
+    //console.log(userData.json());
+    let data = walletData.json();
+    /*
+    if(apiCache.set("user_info", data)){
+        log(ConsoleColor.cyan("[API][CACHE][USERINFO] Setted cache"));
+    }else{
+        log(ConsoleColor.red("[API][CACHE][USERINFO][ERROR] Could not set cache"));
+    }*/
+    res.json(serializeResponse(data));
+}
 function sendCloseSignal(){
     electronSocket.emit("closeApplication")
 }
@@ -889,3 +906,4 @@ exports.declineReadyCheck = declineReadyCheck;
 exports.getMap = getMap;
 exports.getUserInfobyId = getUserInfobyId;
 exports.sendCloseSignal = sendCloseSignal;
+exports.getWallet = getWallet;
